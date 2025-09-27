@@ -34,6 +34,6 @@ router.get('/CIT_Faculty_setting', isAuthenticated, isFaculty, citFacultyControl
 
 // NEW: Enhanced Schedule Selection Routes
 router.get('/CIT_Faculty_available_schedule', isAuthenticated, isFaculty, citFacultyController.getAvailableSchedules);
-router.post('/faculty_select_schedule_slot', isAuthenticated, isFaculty, citFacultyController.selectScheduleSlot);
+router.post('/faculty/select_schedule_slot', isAuthenticated, isFaculty, citFacultyController.selectScheduleSlot);
 
 module.exports = router;
