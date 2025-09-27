@@ -2,18 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Schedule Creation - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>Create Weekly Faculty Schedules</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color-start: #2c5aa0;
-            --primary-color-end: #1a365d;
-            --accent-color: #ffd700;
-            --text-light: #ffffff;
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
             --text-dark: #333;
             --sidebar-width: 280px;
         }
@@ -25,97 +27,167 @@
             min-height: 100vh;
         }
 
+        /* Header styles */
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logo i {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-left: -150px;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .header-icons i {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .header-icons i:hover {
+            color: #17e891;
+        }
+        .user-icon-circle {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+        }
+
         /* Sidebar styles */
         .custom-sidebar {
             width: var(--sidebar-width);
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 1000;
+            bottom: 0;
+            background: linear-gradient(to bottom, #11405b, #0f2027);
+            color: var(--text-light);
             padding: 2rem 1.5rem;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
         }
 
         .custom-sidebar h6 {
-            color: var(--accent-color);
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            color: #fff;
+            margin-bottom: 0.25rem;
         }
 
         .custom-sidebar small {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .custom-sidebar hr {
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
         }
 
         .custom-sidebar a {
             color: var(--text-light);
             text-decoration: none;
-            display: block;
             padding: 0.75rem 1rem;
-            margin: 0.25rem 0;
+            margin-bottom: 0.5rem;
             border-radius: 8px;
-            transition: all 0.3s ease;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .custom-sidebar a i {
-            margin-right: 0.75rem;
+            font-size: 1.25rem;
         }
 
         .custom-sidebar a:hover {
             background: rgba(255, 255, 255, 0.1);
-            color: var(--accent-color);
+            color: #17e891;
         }
 
         .custom-sidebar a.active {
-            background: var(--accent-color);
-            color: var(--text-dark);
+            background: linear-gradient(to right, #2c5364, #203a43);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
         }
 
         .logout-btn {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: var(--text-light);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: left;
             width: 100%;
-            margin-top: 1rem;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: transform 0.2s;
         }
 
         .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        /* Main content */
+        /* Main content styles */
         .main-content {
             margin-left: var(--sidebar-width);
-            padding: 2rem;
-            min-height: 100vh;
+            padding: 7rem 2rem 2rem 2rem;
+            transition: margin-left 0.3s ease-in-out;
         }
 
-        .page-title {
-            font-size: 2rem;
+        .section-title {
+            font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 2rem;
-            color: var(--accent-color);
+            color: #fff;
+            margin-bottom: 1.5rem;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+        /* Card styles */
+        .card-container, .card-border {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
+            border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
         }
 
+        /* Form styles */
         .form-label {
             color: var(--text-light);
             font-weight: 500;
@@ -127,13 +199,12 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-light);
             border-radius: 8px;
-            padding: 0.75rem;
         }
 
         .form-control:focus, .form-select:focus {
             background: rgba(255, 255, 255, 0.15);
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25);
+            border-color: #17e891;
+            box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
             color: var(--text-light);
         }
 
@@ -141,247 +212,446 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        .btn-primary {
-            background: var(--accent-color);
-            border: none;
-            color: var(--text-dark);
+        /* Button styles */
+        .btn {
             font-weight: 500;
-            padding: 0.75rem 2rem;
+            transition: all 0.3s;
             border-radius: 8px;
-            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            border: none;
+            color: #fff;
         }
 
         .btn-primary:hover {
-            background: #e6c200;
+            background: linear-gradient(to right, #17e891, #17c87c);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(to right, #27ae60, #229954);
             transform: translateY(-2px);
         }
 
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        /* Faculty selection styles */
         .faculty-selection {
-            background: rgba(255, 255, 255, 0.05);
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             padding: 1rem;
-            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .faculty-checkbox {
-            margin-bottom: 0.5rem;
+        .form-check {
+            margin-bottom: 0.75rem;
         }
 
-        .faculty-checkbox input[type="checkbox"] {
-            margin-right: 0.5rem;
+        .form-check-input:checked {
+            background-color: #17e891;
+            border-color: #17e891;
         }
 
+        .form-check-label {
+            color: var(--text-light);
+            margin-left: 0.5rem;
+        }
+
+        /* Alert styles */
         .alert {
-            border-radius: 8px;
-            margin-bottom: 1rem;
+            border-radius: 10px;
+            border: none;
         }
 
         .alert-success {
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid rgba(40, 167, 69, 0.4);
-            color: #d4edda;
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border-left: 4px solid #2ecc71;
         }
 
         .alert-danger {
-            background: rgba(220, 53, 69, 0.2);
-            border: 1px solid rgba(220, 53, 69, 0.4);
-            color: #f8d7da;
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
         }
 
-        @media (max-width: 768px) {
+        /* Responsive design */
+        @media (max-width: 992px) {
             .custom-sidebar {
-                transform: translateX(-100%);
+                width: 0;
+                padding: 0;
+                overflow: hidden;
             }
             .main-content {
                 margin-left: 0;
+                width: 100%;
             }
+            header {
+                left: 0;
+            }
+        }
+
+        /* Loading animation */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Custom scrollbar */
+        .faculty-selection::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .faculty-selection::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .faculty-selection::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .faculty-selection::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="custom-sidebar">
-                <h6>Welcome, <%= firstName %> <%= lastName %></h6>
-                <small><%= employeeId %></small>
-                <hr>
-                <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
-                <a href="/admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
-                <a href="/admin_weekly_schedule_creation" class="active"><i class="bi bi-calendar-plus"></i> Create Weekly Schedules</a>
-                <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
-                <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
-                <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
-                <hr>
-                <form action="/logout" method="POST">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="bi bi-mortarboard-fill"></i>
+            <div class="header-title">COPUS Evaluation System</div>
+        </div>
+        <div class="header-icons">
+            <i class="bi bi-bell" data-bs-toggle="tooltip" title="Notifications"></i>
+            <div class="user-icon-circle">
+                <i class="bi bi-person-fill"></i>
             </div>
+        </div>
+    </header>
 
-            <!-- Main Content -->
-            <div class="main-content">
-                <h1 class="page-title">Create Weekly Faculty Schedules</h1>
-                
-                <!-- Flash Messages -->
-                <% if (success_msg && success_msg.length > 0) { %>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <%= success_msg %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
-                
-                <% if (error_msg && error_msg.length > 0) { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <%= error_msg %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <% } %>
+    <!-- Sidebar -->
+    <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+        <a href="/admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+        <a href="/admin_create_weekly_schedule" class="active"><i class="bi bi-calendar-plus"></i> Create Weekly Schedules</a>
+        <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+        <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+        <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
 
-                <div class="card">
-                    <form method="POST" action="/admin_create_weekly_schedule" id="weeklyScheduleForm">
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Flash Messages -->
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+        
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <h2 class="section-title">
+            <i class="bi bi-calendar-plus me-2"></i>
+            Create Weekly Faculty Schedules
+        </h2>
+
+        <div class="card-container">
+            <form id="weeklyScheduleForm" method="POST" action="/admin_create_weekly_schedule">
+                <div class="row">
+                    <!-- Date Range Section -->
+                    <div class="col-md-6 mb-4">
+                        <h5 class="text-light mb-3">
+                            <i class="bi bi-calendar-range me-2"></i>
+                            Schedule Date Range
+                        </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="startDate" class="form-label">Start Date</label>
+                                <label for="startDate" class="form-label">Start Date (Monday)</label>
                                 <input type="date" class="form-control" id="startDate" name="startDate" required>
+                                <small class="text-muted">Select the Monday of the week</small>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="endDate" class="form-label">End Date</label>
-                                <input type="date" class="form-control" id="endDate" name="endDate" required>
+                                <label for="endDate" class="form-label">End Date (Saturday)</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" required readonly>
+                                <small class="text-muted">Automatically calculated</small>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Time Range Section -->
+                    <div class="col-md-6 mb-4">
+                        <h5 class="text-light mb-3">
+                            <i class="bi bi-clock me-2"></i>
+                            Time Schedule
+                        </h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="startTime" class="form-label">Start Time</label>
-                                <input type="time" class="form-control" id="startTime" name="startTime" required>
+                                <input type="time" class="form-control" id="startTime" name="startTime" value="08:00" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="endTime" class="form-label">End Time</label>
-                                <input type="time" class="form-control" id="endTime" name="endTime" required>
+                                <input type="time" class="form-control" id="endTime" name="endTime" value="17:00" required>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="yearLevel" class="form-label">Year Level</label>
-                                <select class="form-select" id="yearLevel" name="yearLevel" required>
-                                    <option value="">Select Year Level</option>
-                                    <option value="1st Year">1st Year</option>
-                                    <option value="2nd Year">2nd Year</option>
-                                    <option value="3rd Year">3rd Year</option>
-                                    <option value="4th Year">4th Year</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="schoolYear" class="form-label">School Year</label>
-                                <input type="text" class="form-control" id="schoolYear" name="schoolYear" 
-                                       placeholder="e.g., 2023-2024" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="semester" class="form-label">Semester</label>
-                                <select class="form-select" id="semester" name="semester" required>
-                                    <option value="">Select Semester</option>
-                                    <option value="Semester 1">Semester 1</option>
-                                    <option value="Semester 2">Semester 2</option>
-                                </select>
-                            </div>
+                <div class="row">
+                    <!-- Academic Details Section -->
+                    <div class="col-md-4 mb-4">
+                        <h5 class="text-light mb-3">
+                            <i class="bi bi-book me-2"></i>
+                            Academic Details
+                        </h5>
+                        <div class="mb-3">
+                            <label for="yearLevel" class="form-label">Year Level</label>
+                            <select class="form-select" id="yearLevel" name="yearLevel" required>
+                                <option value="">Select Year Level</option>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label for="modality" class="form-label">Modality</label>
-                                <select class="form-select" id="modality" name="modality" required>
-                                    <option value="">Select Modality</option>
-                                    <option value="RAD">RAD (Face-to-Face)</option>
-                                    <option value="FLEX">FLEX (Flexible)</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="semester" class="form-label">Semester</label>
+                            <select class="form-select" id="semester" name="semester" required>
+                                <option value="">Select Semester</option>
+                                <option value="1st Semester">1st Semester</option>
+                                <option value="2nd Semester">2nd Semester</option>
+                            </select>
                         </div>
+                    </div>
 
-                        <div class="faculty-selection">
-                            <label class="form-label">Select Faculty Members</label>
-                            <div class="row">
-                                <% if (facultyMembers && facultyMembers.length > 0) { %>
-                                    <% facultyMembers.forEach(faculty => { %>
-                                        <div class="col-md-6 faculty-checkbox">
-                                            <input type="checkbox" name="selectedFaculty" value="<%= faculty._id %>" 
-                                                   id="faculty_<%= faculty._id %>">
-                                            <label for="faculty_<%= faculty._id %>">
-                                                <%= faculty.firstname %> <%= faculty.lastname %> 
-                                                (<%= faculty.department %>)
-                                            </label>
-                                        </div>
-                                    <% }); %>
-                                <% } else { %>
-                                    <p class="text-muted">No faculty members found.</p>
-                                <% } %>
-                            </div>
-                            <div class="mt-2">
-                                <button type="button" class="btn btn-sm btn-outline-light" onclick="selectAllFaculty()">
-                                    Select All
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-light ms-2" onclick="clearAllFaculty()">
-                                    Clear All
-                                </button>
-                            </div>
+                    <div class="col-md-4 mb-4">
+                        <h5 class="text-light mb-3">
+                            <i class="bi bi-calendar-date me-2"></i>
+                            School Year & Modality
+                        </h5>
+                        <div class="mb-3">
+                            <label for="schoolYear" class="form-label">School Year</label>
+                            <input type="text" class="form-control" id="schoolYear" name="schoolYear" 
+                                   placeholder="e.g., 2024-2025" required pattern="[0-9]{4}-[0-9]{4}">
                         </div>
+                        <div class="mb-3">
+                            <label for="modality" class="form-label">Modality</label>
+                            <select class="form-select" id="modality" name="modality" required>
+                                <option value="">Select Modality</option>
+                                <option value="Face-to-Face">Face-to-Face</option>
+                                <option value="Online">Online</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
 
-                        <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> Create Weekly Schedules
+                    <div class="col-md-4 mb-4">
+                        <h5 class="text-light mb-3">
+                            <i class="bi bi-toggles me-2"></i>
+                            Quick Actions
+                        </h5>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-secondary" id="selectAllBtn">
+                                <i class="bi bi-check-all me-2"></i>Select All Faculty
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="clearAllBtn">
+                                <i class="bi bi-x-circle me-2"></i>Clear All
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h5 class="mb-3">Instructions</h5>
-                    <ul>
-                        <li>This will create daily schedules for all selected faculty members from Monday to Saturday.</li>
-                        <li>Sundays are automatically excluded from schedule creation.</li>
-                        <li>ALC observers will later create specific observation slots from these template schedules.</li>
-                        <li>Faculty members can then select from the observation slots created by ALC.</li>
-                    </ul>
+                <!-- Faculty Selection Section -->
+                <div class="mb-4">
+                    <h5 class="text-light mb-3">
+                        <i class="bi bi-people me-2"></i>
+                        Select Faculty Members
+                        <small class="text-muted">(<span id="selectedCount">0</span> selected)</small>
+                    </h5>
+                    <div class="faculty-selection">
+                        <% if (facultyMembers && facultyMembers.length > 0) { %>
+                            <% facultyMembers.forEach(faculty => { %>
+                                <div class="form-check">
+                                    <input class="form-check-input faculty-checkbox" type="checkbox" 
+                                           name="selectedFaculty" value="<%= faculty._id %>" 
+                                           id="faculty_<%= faculty._id %>">
+                                    <label class="form-check-label" for="faculty_<%= faculty._id %>">
+                                        <strong><%= faculty.firstname %> <%= faculty.lastname %></strong>
+                                        <small class="text-muted d-block">
+                                            <%= faculty.department %> • <%= faculty.employeeId %>
+                                        </small>
+                                    </label>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-person-x display-4 d-block mb-2"></i>
+                                No faculty members found.
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Submit Button -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Create Weekly Schedules
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Instructions Card -->
+        <div class="card-container">
+            <h5 class="text-light mb-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Instructions
+            </h5>
+            <ul class="text-light">
+                <li>Select a Monday as the start date - the system will automatically calculate the Saturday end date</li>
+                <li>Choose the time range that applies to all faculty members for the week</li>
+                <li>Fill in the academic details (Year Level, Semester, School Year, Modality)</li>
+                <li>Select one or more faculty members to create schedules for</li>
+                <li>The system will create individual schedules for each selected faculty member for Monday through Saturday</li>
+                <li>Created schedules will be available for ALC observers to convert into observation slots</li>
+            </ul>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function selectAllFaculty() {
-            const checkboxes = document.querySelectorAll('input[name="selectedFaculty"]');
-            checkboxes.forEach(checkbox => checkbox.checked = true);
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const facultyCheckboxes = document.querySelectorAll('.faculty-checkbox');
+            const selectedCount = document.getElementById('selectedCount');
+            const submitBtn = document.getElementById('submitBtn');
+            const form = document.getElementById('weeklyScheduleForm');
 
-        function clearAllFaculty() {
-            const checkboxes = document.querySelectorAll('input[name="selectedFaculty"]');
-            checkboxes.forEach(checkbox => checkbox.checked = false);
-        }
+            // Auto-calculate end date (Saturday) when start date (Monday) is selected
+            startDateInput.addEventListener('change', function() {
+                const startDate = new Date(this.value);
+                const dayOfWeek = startDate.getDay();
+                
+                // If not Monday, adjust to the next Monday
+                if (dayOfWeek !== 1) {
+                    const daysUntilMonday = (8 - dayOfWeek) % 7;
+                    startDate.setDate(startDate.getDate() + daysUntilMonday);
+                    this.value = startDate.toISOString().split('T')[0];
+                }
+                
+                // Calculate Saturday (5 days after Monday)
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 5);
+                endDateInput.value = endDate.toISOString().split('T')[0];
+            });
 
-        // Form validation
-        document.getElementById('weeklyScheduleForm').addEventListener('submit', function(e) {
-            const selectedFaculty = document.querySelectorAll('input[name="selectedFaculty"]:checked');
-            if (selectedFaculty.length === 0) {
-                e.preventDefault();
-                alert('Please select at least one faculty member.');
-                return false;
+            // Select all faculty
+            selectAllBtn.addEventListener('click', function() {
+                facultyCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                updateSelectedCount();
+            });
+
+            // Clear all selections
+            clearAllBtn.addEventListener('click', function() {
+                facultyCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updateSelectedCount();
+            });
+
+            // Update selected count
+            function updateSelectedCount() {
+                const selected = document.querySelectorAll('.faculty-checkbox:checked').length;
+                selectedCount.textContent = selected;
             }
 
-            const startDate = new Date(document.getElementById('startDate').value);
-            const endDate = new Date(document.getElementById('endDate').value);
-            
-            if (endDate < startDate) {
-                e.preventDefault();
-                alert('End date must be after start date.');
-                return false;
-            }
+            // Add event listeners to checkboxes
+            facultyCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+
+            // Form submission with validation and loading state
+            form.addEventListener('submit', function(e) {
+                const selectedFaculty = document.querySelectorAll('.faculty-checkbox:checked');
+                
+                if (selectedFaculty.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one faculty member.');
+                    return;
+                }
+
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating Schedules...';
+            });
+
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // School year pattern validation
+            const schoolYearInput = document.getElementById('schoolYear');
+            schoolYearInput.addEventListener('input', function() {
+                const value = this.value;
+                const pattern = /^\d{4}-\d{4}$/;
+                
+                if (value && !pattern.test(value)) {
+                    this.setCustomValidity('Please enter school year in format: YYYY-YYYY (e.g., 2024-2025)');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+
+            // Initialize selected count
+            updateSelectedCount();
         });
-
-        // Set minimum date to today
-        document.getElementById('startDate').min = new Date().toISOString().split('T')[0];
-        document.getElementById('endDate').min = new Date().toISOString().split('T')[0];
     </script>
 </body>
 </html>
