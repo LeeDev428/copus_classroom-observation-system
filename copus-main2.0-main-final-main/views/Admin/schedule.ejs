@@ -147,6 +147,16 @@
             }
         }
 
+        @media (max-width: 768px) {
+            .custom-table {
+                font-size: 0.9rem;
+            }
+            .custom-table thead tr th,
+            .custom-table tbody td {
+                padding: 0.5rem;
+            }
+        }
+
         .card-border {
             background: var(--card-bg-transparent);
             backdrop-filter: blur(5px);
@@ -239,6 +249,7 @@
             border-collapse: separate;
             border-spacing: 0 10px;
             color: var(--text-light);
+            table-layout: auto;
         }
 
         .custom-table thead tr th {
@@ -247,7 +258,13 @@
             padding: 1rem;
             text-align: left;
             border: none;
+            white-space: nowrap;
         }
+
+        .custom-table thead tr th:nth-child(1) { width: 10%; }
+        .custom-table thead tr th:nth-child(2) { width: 40%; }
+        .custom-table thead tr th:nth-child(3) { width: 30%; }
+        .custom-table thead tr th:nth-child(4) { width: 20%; }
 
         .custom-table thead tr th:first-child {
             border-top-left-radius: 10px;
@@ -272,6 +289,7 @@
             padding: 1rem;
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
         }
 
         .custom-table tbody tr td:first-child {
@@ -477,6 +495,7 @@
         <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
         <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
         <a href="/admin_schedule"  class="active"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+        <a href="/admin_create_weekly_schedule"><i class="bi bi-calendar-plus"></i> Create Weekly Schedules</a>
         <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
         <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
         <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
@@ -495,18 +514,15 @@
                 </div>
             </div>
             <div class="search-bar">
-    <input type="text" id="searchInput" class="search-input" placeholder="Search by name, email, role...">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by faculty name or date...">
 </div>
             <div class="table-responsive">
                 <table class="table custom-table">
                     <thead>
                         <tr>
                             <th>ID #</th>
-                            <th>Last Name</th>
-                            <th>First Name</th>
-                            <th>Role</th>
-                            <th>PHINMA E-mail</th>
-                            <th>Department</th>
+                            <th>Faculty Name</th>
+                            <th>Date Created</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -515,13 +531,13 @@
         <% schedules.forEach(function(schedule, index) { %>
             <tr>
                 <th scope="row"><%= index + 1 %></th>
-                <td><%= schedule.faculty_user_id.firstname %> <%= schedule.faculty_user_id.lastname %></td>
+                <td><%= schedule.faculty_user_id ? (schedule.faculty_user_id.firstname + ' ' + schedule.faculty_user_id.lastname) : 'N/A' %></td>
                 <td><%= schedule.createdAt.toLocaleDateString() %></td>
                 <td>
                     <button class="btn btn-sm btn-info view-schedule-btn"
                         data-bs-toggle="modal"
                         data-bs-target="#viewScheduleModal"
-                        data-fullname="<%= schedule.faculty_user_id.firstname %> <%= schedule.faculty_user_id.lastname %>"
+                        data-fullname="<%= schedule.faculty_user_id ? (schedule.faculty_user_id.firstname + ' ' + schedule.faculty_user_id.lastname) : 'N/A' %>"
                         data-image="<%= schedule.image_path %>">
                         View
                     </button>
@@ -675,6 +691,7 @@
                 e.preventDefault();
                 if (currentPage > 1) {
                     currentPage--;
+                    displayRows(currentPage);
                     renderPagination();
                 }
             });
@@ -696,6 +713,7 @@
                 firstPageLi.addEventListener('click', (e) => {
                     e.preventDefault();
                     currentPage = 1;
+                    displayRows(currentPage);
                     renderPagination();
                 });
                 paginationContainer.appendChild(firstPageLi);
@@ -717,6 +735,7 @@
                 li.addEventListener('click', (e) => {
                     e.preventDefault();
                     currentPage = i;
+                    displayRows(currentPage);
                     renderPagination();
                 });
             }
@@ -736,6 +755,7 @@
                 lastPageLi.addEventListener('click', (e) => {
                     e.preventDefault();
                     currentPage = totalPages;
+                    displayRows(currentPage);
                     renderPagination();
                 });
                 paginationContainer.appendChild(lastPageLi);
@@ -750,6 +770,7 @@
                 e.preventDefault();
                 if (currentPage < totalPages) {
                     currentPage++;
+                    displayRows(currentPage);
                     renderPagination();
                 }
             });
@@ -757,8 +778,34 @@
             displayRows(currentPage);
         }
 
+        // Initialize pagination on page load
+        displayRows(currentPage);
         renderPagination();
         // --- End of NEW pagination logic ---
+
+        // --- Fix View Button Event Delegation ---
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('view-schedule-btn')) {
+                const fullName = e.target.getAttribute('data-fullname');
+                const imagePath = e.target.getAttribute('data-image');
+                
+                // Update modal content
+                document.getElementById('scheduleUserFullName').textContent = fullName;
+                const scheduleImage = document.getElementById('scheduleImage');
+                
+                if (imagePath && imagePath !== 'null' && imagePath !== '') {
+                    scheduleImage.src = `/${imagePath.replace(/\\/g, '/')}`;
+                    scheduleImage.style.display = 'block';
+                } else {
+                    scheduleImage.style.display = 'none';
+                }
+                
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('viewScheduleModal'));
+                modal.show();
+            }
+        });
+        // --- End View Button Fix ---
 
          // CORRECT MODAL AND FORM SUBMISSION LOGIC
         const createScheduleForm = document.getElementById('createScheduleForm');
@@ -796,26 +843,39 @@
         });
         // END CORRECT MODAL AND FORM SUBMISSION LOGIC
 
-       // --- Start of NEW View Button Modal Logic ---
-        const viewModal = new bootstrap.Modal(document.getElementById('viewScheduleModal'));
+       // --- Fixed View Button Modal Logic ---
         const scheduleUserFullName = document.getElementById('scheduleUserFullName');
         const scheduleImage = document.getElementById('scheduleImage');
 
+        // Handle view button clicks with proper modal showing
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('view-schedule-btn')) {
                 const button = e.target;
                 const fullName = button.getAttribute('data-fullname');
-                const imagePath = button.getAttribute('data-image'); // Get the image path from the server
+                const imagePath = button.getAttribute('data-image');
                 
+                console.log('View button clicked:', fullName, imagePath);
+                
+                // Update modal content
                 scheduleUserFullName.textContent = fullName;
-                scheduleImage.src = `/${imagePath}`;
+                if (imagePath && imagePath !== 'undefined') {
+                    scheduleImage.src = `/${imagePath}`;
+                    scheduleImage.style.display = 'block';
+                } else {
+                    scheduleImage.style.display = 'none';
+                }
+                
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('viewScheduleModal'));
+                modal.show();
             }
         });
-        // --- End of NEW View Button Modal Logic ---
+        // --- End of Fixed View Button Modal Logic ---
         
         // --- START OF CORRECTED SEARCH BAR LOGIC ---
         const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
+        
+        if (searchInput && allRows.length > 0) {
             searchInput.addEventListener('keyup', function() {
                 const query = this.value.toLowerCase();
 
@@ -829,33 +889,25 @@
                     }
                 });
 
-                // Hide pagination when searching, as all rows are being displayed or hidden
-                if (query.trim() !== '') {
-                    paginationContainer.style.display = 'none';
-                } else {
-                    // Restore pagination when the search field is empty
-                    renderPagination();
-                }
+                // Update pagination after search
+                updatePaginationForSearch(query);
             });
+        }
+        
+        function updatePaginationForSearch(query) {
+            if (query.trim() !== '') {
+                // Hide pagination when searching
+                if (paginationContainer) {
+                    paginationContainer.style.display = 'none';
+                }
+            } else {
+                // Restore pagination when search is cleared
+                displayRows(currentPage);
+                renderPagination();
+            }
         }
         // --- END OF CORRECTED SEARCH BAR LOGIC ---
     });
-
-   document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('view-schedule-btn')) {
-        const button = e.target;
-        const fullName = button.getAttribute('data-fullname');
-        // Get the image path and replace all backslashes with forward slashes
-        const imagePath = button.getAttribute('data-image').replace(/\\/g, '/');
-
-        const scheduleUserFullName = document.getElementById('scheduleUserFullName');
-        const scheduleImage = document.getElementById('scheduleImage');
-
-        scheduleUserFullName.textContent = fullName;
-        // Construct the public URL for the image
-        scheduleImage.src = `/${imagePath}`; 
-    }
-});
 </script>
 </body>
 </html>
