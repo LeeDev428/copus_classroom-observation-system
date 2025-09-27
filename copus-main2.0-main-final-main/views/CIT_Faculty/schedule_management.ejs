@@ -371,8 +371,8 @@
                     <tbody>
                         <% if (schedules && schedules.length > 0) { %>
                             <% schedules.forEach(function(schedule) { %>
-                                <tr data-search-term="<%= schedule.faculty_user_id.firstname %> <%= schedule.faculty_user_id.lastname %> <%= schedule.createdAt.toLocaleDateString() %> <%= schedule.status %>">
-                                    <td><%= schedule.faculty_user_id.firstname %> <%= schedule.faculty_user_id.lastname %></td>
+                                <tr data-search-term="<%= schedule.faculty_user_id ? (schedule.faculty_user_id.firstname + ' ' + schedule.faculty_user_id.lastname) : 'N/A' %> <%= schedule.createdAt.toLocaleDateString() %> <%= schedule.status %>">
+                                    <td><%= schedule.faculty_user_id ? (schedule.faculty_user_id.firstname + ' ' + schedule.faculty_user_id.lastname) : 'N/A' %></td>
                                     <td><%= schedule.createdAt.toLocaleDateString() %></td>
                                     <td>
                                         <% if (schedule.image_path) { %>
