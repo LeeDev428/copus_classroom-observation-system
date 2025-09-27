@@ -262,12 +262,12 @@ const adminController = {
             });
 
             req.flash('success', `Successfully created ${createdSchedules.length} weekly schedules!`);
-            res.redirect('/admin_weekly_schedule_creation');
+            res.redirect('/admin_create_weekly_schedule');
 
         } catch (err) {
             console.error('Error creating weekly schedules:', err);
             req.flash('error', 'Failed to create weekly schedules.');
-            res.redirect('/admin_weekly_schedule_creation');
+            res.redirect('/admin_create_weekly_schedule');
         }
     },
 
