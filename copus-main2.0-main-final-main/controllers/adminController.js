@@ -208,6 +208,12 @@ const adminController = {
                 selectedFaculty // Array of faculty IDs
             } = req.body;
 
+            // Validate selectedFaculty
+            if (!selectedFaculty || !Array.isArray(selectedFaculty) || selectedFaculty.length === 0) {
+                req.flash('error', 'Please select at least one faculty member.');
+                return res.redirect('/admin_create_weekly_schedule');
+            }
+
             const start = new Date(startDate);
             const end = new Date(endDate);
             const createdSchedules = [];
@@ -248,8 +254,8 @@ const adminController = {
                         observers: [] // Empty initially
                     });
 
-                    await newSchedule.save();
-                    createdSchedules.push(newSchedule);
+                    const savedSchedule = await newSchedule.save();
+                    createdSchedules.push(savedSchedule);
                 }
             }
 
