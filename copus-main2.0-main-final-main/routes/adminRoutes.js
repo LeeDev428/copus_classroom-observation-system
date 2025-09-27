@@ -38,7 +38,12 @@ router.get('/admin_copus_history', isAuthenticated, adminController.getCopusHist
 router.get('/admin_setting', isAuthenticated, adminController.getSetting);
 
 // NEW: Weekly Schedule Creation Routes
-router.get('/admin_weekly_schedule_creation', isAuthenticated, adminController.getWeeklyScheduleCreation);
+router.get('/admin_create_weekly_schedule', isAuthenticated, adminController.getWeeklyScheduleCreation);
 router.post('/admin_create_weekly_schedule', isAuthenticated, adminController.createWeeklySchedule);
+
+// Alternative route for backward compatibility (redirect to main route)
+router.get('/admin_weekly_schedule_creation', isAuthenticated, (req, res) => {
+    res.redirect('/admin_create_weekly_schedule');
+});
 
 module.exports = router;
