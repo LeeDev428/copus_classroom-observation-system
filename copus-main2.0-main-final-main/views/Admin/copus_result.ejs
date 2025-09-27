@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Copus Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* --- Root Variables --- */
+:root {
+  --primary-color-start: #0f2027; /* Dark blue */
+  --primary-color-end: #203a43; /* Darker blue */
+  --secondary-color-start: #2c5364; /* Blue-green */
+  --secondary-color-end: #203a43; /* Darker blue */
+  --text-light: #e0e0e0;
+  --text-dark: #333;
+  --sidebar-width: 280px;
+  --accent-color: #17e891; /* A vibrant green for accents */
+  --danger-color: #e74c3c; /* Red for logout/cancel */
+  --card-bg-transparent: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Base Styles --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: var(--text-light);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+/* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Main Content --- */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  min-height: 100vh;
+  padding-top: 5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+.form-control {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
+}
+
+.form-control::placeholder {
+  color: rgba(224, 224, 224, 0.5);
+}
+
+/* --- Card Styles --- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.profile-circle {
+  width: 80px;
+  height: 80px;
+  background: #2c5364;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin: 0 auto 1rem;
+}
+
+.bit {
+  margin: 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.info {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.info p {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info strong {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.info .blue {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.result-btn {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+  width: 100%;
+}
+
+.result-btn:hover {
+  background: linear-gradient(to right, #17e891, #17c87c);
+  color: var(--text-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .custom-sidebar {
+    transform: translateX(-100%);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 2rem;
+  }
+  h1 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .custom-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    box-shadow: none;
+    padding-bottom: 0;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 1.5rem;
+  }
+}
+</style>
+</head>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+     <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+  <hr>
+  <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+  <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+  <a href="/admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+  <a href="/admin_copus_result" class="active"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+  <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+  <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+  <hr>
+  <form action="/logout" method="POST">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form> 
+</div>
+
+
+      <!-- Main content -->
+       <main class="main-content">
+      <h1>COPUS RESULT</h1>
+      <div class="mb-3">
+  <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, email,...">
+</div>
+      <div class="cards">
+        <div class="card">
+          <div class="profile-circle">PROFILE</div>
+          <p class="bit">JERALD R ESPARES</p>
+          <p class="bit">EMP-2025-0001</p>
+          <div class="info">
+            <p><strong>DATE:</strong> <span class="blue">SEPTEMBER 11 2022</span></p>
+            <p><strong>TIME:</strong> 8:00 a.m. – 10:00 a.m.</p>
+            <p><strong>SUBJECT:</strong> <span class="blue">ITE 6999 Capstone 1</span></p>
+            <p><strong>SEMESTER:</strong> <span class="blue">1st Semester</span></p>
+            <p><strong>MODALITY:</strong> FLEX</p>
+            <p><strong>OBSERVER:</strong> <span class="blue">Evelyn Juliano</span></p>
+          </div>
+          <button class="result-btn">VIEW COPUS RESULT</button>
+        </div>
+
+        <!-- Repeat Card for Other Entries -->
+        <div class="card">
+          <div class="profile-circle">PROFILE</div>
+           <p class="bit">JERALD R ESPARES</p>
+          <p class="bit">EMP-2025-0001</p>
+          <div class="info">
+            <p><strong>DATE:</strong> <span class="blue">SEPTEMBER 11 2022</span></p>
+            <p><strong>TIME:</strong> 8:00 a.m. – 10:00 a.m.</p>
+            <p><strong>SUBJECT:</strong> <span class="blue">ITE 6999 Capstone 1</span></p>
+            <p><strong>SEMESTER:</strong> <span class="blue">1st Semester</span></p>
+            <p><strong>MODALITY:</strong> FLEX</p>
+            <p><strong>OBSERVER:</strong> <span class="blue">Evelyn Juliano</span></p>
+          </div>
+          <button class="result-btn">VIEW COPUS RESULT</button>
+        </div>
+
+        <div class="card">
+          <div class="profile-circle">PROFILE</div>
+            <p class="bit">JERALD R ESPARES</p>
+          <p class="bit">EMP-2025-0001</p>
+          <div class="info">
+            <p><strong>DATE:</strong> <span class="blue">SEPTEMBER 11 2022</span></p>
+            <p><strong>TIME:</strong> 8:00 a.m. – 10:00 a.m.</p>
+            <p><strong>SUBJECT:</strong> <span class="blue">ITE 6999 Capstone 1</span></p>
+            <p><strong>SEMESTER:</strong> <span class="blue">1st Semester</span></p>
+            <p><strong>MODALITY:</strong> FLEX</p>
+            <p><strong>OBSERVER:</strong> <span class="blue">Evelyn Juliano</span></p>
+          </div>
+          <button class="result-btn">VIEW COPUS RESULT</button>
+        </div>
+      </div>
+    </main>
+      
+  </div>
+  <script src="/js/Super_Admin/copus_result.js"></script>
+</body>
+</html>

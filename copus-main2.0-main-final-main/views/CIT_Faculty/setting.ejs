@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIT Faculty Setting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Links to Bootstrap CSS and Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Using a CDN for Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CSS for the page */
+        :root {
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            padding-top: 50px;
+            min-height: 100vh;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            z-index: 1100;
+            transition: left 0.3s ease;
+        }
+
+        .logo {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            margin: -5px 0 0 10px;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-icons i {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .header-icons i:hover {
+            color: #17e891;
+        }
+
+        .user-icon-circle {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .user-icon-circle i {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .custom-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+             background: linear-gradient(to bottom, #11405b, #0f2027);
+
+            color: var(--text-light);
+            padding: 2rem 1.5rem;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 1001;
+            transition: left 0.3s ease;
+        }
+
+        .custom-sidebar h6 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-sidebar small {
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+
+        .custom-sidebar hr {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .custom-sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .custom-sidebar a i {
+            font-size: 1.25rem;
+        }
+
+        .custom-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #17e891;
+            transform: translateX(4px);
+        }
+
+        .custom-sidebar a.active {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+            transform: translateX(0);
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            width: 100%;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: left;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 7rem 2rem 2rem 2rem;
+            background: none;
+            min-height: 100vh;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            header,
+            .main-content {
+                margin-left: 0;
+            }
+            .custom-sidebar {
+                left: -280px;
+            }
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #17e891;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #2c5364, #203a43);
+            color: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #17e891;
+        }
+
+        .name {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .lock-icon {
+            font-size: 20px;
+            color: #17e891;
+        }
+
+        .form-section {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-subtitle {
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.45rem 0.75rem;
+            border: 2px solid #2c5364;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #17e891;
+        }
+
+        .primary-btn {
+            display: inline-block;
+            background: linear-gradient(to right, #2c5364, #203a43);
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .primary-btn:hover {
+            background: linear-gradient(to right, #203a43, #2c5364);
+            transform: translateY(-2px);
+        }
+
+        .help-img {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .help-img img {
+            max-width: 150px;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+        }
+
+        .password-form .form-content {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .form-fields {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .help-img {
+            max-width: 200px;
+            margin-right: 0;
+            flex-shrink: 0;
+        }
+
+        .help-img img {
+            width: 100%;
+            height: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .fof {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .fof label {
+            display: block;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .fof input {
+            width: 50%;
+            padding: 0.5rem;
+            border: 2px solid #2c5364;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .primary-btn {
+            display: block;
+            margin: 1.5rem auto 0;
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(to right, #2c5364, #203a43);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn:hover {
+            background: linear-gradient(to right, #203a43, #2c5364);
+            transform: translateY(-2px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2c5364, #203a43);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 2px solid #2c5364 !important;
+            color: #fff !important;
+        }
+
+        .form-control:focus {
+            border-color: #17e891 !important;
+            box-shadow: none !important;
+        }
+
+        .btn-secondary {
+            background-color: #7f8c8d;
+            border-color: #7f8c8d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6c7a7b;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #203a43, #2c5364);
+        }
+        
+    </style>
+</head>
+<body>
+ 
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="custom-sidebar">
+                <!-- Replaced dynamic content with static placeholders -->
+               <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+                <hr>
+                 <a href="/CIT_Faculty_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="/CIT_Faculty_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+            <a href="/CIT_Faculty_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+            <a href="/CIT_Faculty_schedule_management" ><i class="bi bi-calendar-event-fill"></i>My Schedule</a>
+            <a href="/CIT_Faculty_available_schedule"><i class="bi bi-calendar-plus"></i> Find Schedule Slot</a>
+            <a href="/CIT_Faculty_setting" class="active"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+                <hr>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+
+            <div class="main-content">
+                <h5 class="section-title">ACCOUNT SETTINGS</h5>
+
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <!-- Replaced local image with a placeholder -->
+                        <img src="https://placehold.co/50x50/2c5364/ffffff?text=JD" alt="Profile">
+                        <div>
+                            <h6 class="name">John Doe</h6>
+                        </div>
+                    </div>
+                    <!-- Using Bootstrap icon instead of unicode character -->
+                    <i class="bi bi-lock-fill lock-icon"></i>
+                </div>
+
+                <div class="form-section">
+                    <h6 class="section-subtitle">PROFILE INFORMATION</h6>
+                    <hr>
+                    <form id="profileInfoForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstname">FIRST NAME *</label>
+                                <input type="text" id="firstname" class="form-control" placeholder="First Name" name="firstname" value="John" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">LAST NAME *</label>
+                                <input type="text" id="lastname" class="form-control" placeholder="Last Name" name="lastname" value="Doe" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="middleInitial">MIDDLE INITIAL</label>
+                                <input type="text" id="middleInitial" class="form-control" placeholder="Middle Initial" name="middleInitial" value="D" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">PHINMA EMAIL *</label>
+                                <input type="email" id="email" class="form-control" placeholder="PHINMA Email" name="email" value="john.doe@example.com" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="department">DEPARTMENT *</label>
+                                <input type="text" id="department" class="form-control" placeholder="Department" name="department" value="CIT" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="dean">DEAN *</label>
+                                <input type="text" id="dean" class="form-control" placeholder="Dean" name="dean" value="Jane Smith" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="assignedProgramHead">ASSIGNED PROGRAM HEAD (IF APPLICABLE)</label>
+                                <input type="text" id="assignedProgramHead" class="form-control" placeholder="Assigned Program Head" name="assignedProgramHead" value="N/A" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="yearsOfTeachingExperience">YEARS OF TEACHING EXPERIENCE IN PHINMA ED *</label>
+                                <input type="text" id="yearsOfTeachingExperience" class="form-control" placeholder="Years of Teaching" name="yearsOfTeachingExperience" value="5" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="yearHired">YEAR HIRED *</label>
+                                <input type="text" id="yearHired" class="form-control" placeholder="Year Hired" name="yearHired" value="2018" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="yearRegularized">YEAR REGULARIZED *</label>
+                                <input type="text" id="yearRegularized" class="form-control" placeholder="Year Regularized" name="yearRegularized" value="2020" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="highestEducationalAttainment">HIGHEST EDUCATIONAL ATTAINMENT *</label>
+                                <input type="text" id="highestEducationalAttainment" class="form-control" placeholder="Educational Attainment" name="highestEducationalAttainment" value="Master's Degree" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="professionalLicense">PROFESSIONAL LICENSE *</label>
+                                <input type="text" id="professionalLicense" class="form-control" placeholder="Professional License" name="professionalLicense" value="Licensed Teacher" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="employmentStatus">EMPLOYMENT STATUS *</label>
+                                <input type="text" id="employmentStatus" class="form-control" placeholder="Employment Status" name="employmentStatus" value="Regular" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="rank">RANK *</label>
+                                <input type="text" id="rank" class="form-control" placeholder="Rank" name="rank" value="Instructor I" readonly>
+                            </div>
+                        </div>
+                        <button type="button" id="updateProfileInfoBtn" class="primary-btn">UPDATE INFORMATION</button>
+                    </form>
+                </div>
+
+                <div class="modal fade" id="confirmProfileUpdateModal" tabindex="-1" aria-labelledby="confirmProfileUpdateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="confirmProfileUpdateModalLabel">Edit Profile Information</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="profileUpdateReviewContent" class="p-3"></div>
+                                <div id="profileUpdateErrorAlert" class="alert alert-danger mt-3" style="display:none;" role="alert"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" id="submitProfileUpdateBtn" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h6 class="section-subtitle">PASSWORD</h6>
+                    <hr>
+                    <form class="password-form">
+                        <div class="form-content">
+                            <div class="form-fields">
+                                <div class="fof">
+                                    <label>CURRENT PASSWORD *</label>
+                                    <input type="password" placeholder="Current Password" readonly>
+                                </div>
+                                <div class="fof">
+                                    <label>NEW PASSWORD *</label>
+                                    <input type="password" placeholder="New Password" readonly>
+                                </div>
+                                <div class="fof">
+                                    <label>RE-TYPE NEW PASSWORD *</label>
+                                    <input type="password" placeholder="Confirm New Password" readonly>
+                                </div>
+                            </div>
+                            <div class="help-img">
+                                <!-- Replaced local image with a placeholder -->
+                                <img src="https://placehold.co/200x200/2c5364/ffffff?text=Password" alt="Password Help">
+                            </div>
+                        </div>
+                        <button type="button" class="primary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">UPDATE PASSWORD</button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">CURRENT PASSWORD *</label>
+                            <input type="password" class="form-control" id="currentPassword" name="currentPassword" placeholder="Current Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">NEW PASSWORD *</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="New Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmNewPassword" class="form-label">RE-TYPE NEW PASSWORD *</label>
+                            <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm New Password" required>
+                        </div>
+                        <div id="passwordErrorAlert" class="alert alert-danger mt-3" style="display:none;" role="alert"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="submitChangePasswordBtn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and custom script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const updateProfileBtn = document.getElementById('updateProfileInfoBtn');
+            const changePasswordBtn = document.getElementById('submitChangePasswordBtn');
+            const profileForm = document.getElementById('profileInfoForm');
+            
+            // Dummy logic for the profile update modal
+            updateProfileBtn.addEventListener('click', () => {
+                // Here you would normally gather the form data and display it in the modal
+                const modal = new bootstrap.Modal(document.getElementById('confirmProfileUpdateModal'));
+                const reviewContent = document.getElementById('profileUpdateReviewContent');
+                reviewContent.innerHTML = 'This modal would show a summary of your changes. It is currently a placeholder.';
+                modal.show();
+            });
+
+            // Dummy logic for the password change modal
+            changePasswordBtn.addEventListener('click', () => {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+                const errorAlert = document.getElementById('passwordErrorAlert');
+                
+                if (newPassword !== confirmNewPassword) {
+                    errorAlert.textContent = 'New passwords do not match!';
+                    errorAlert.style.display = 'block';
+                } else if (newPassword.length < 6) {
+                    errorAlert.textContent = 'Password must be at least 6 characters long.';
+                    errorAlert.style.display = 'block';
+                } else {
+                    errorAlert.style.display = 'none';
+                    // Here you would typically send the new password to your server
+                    console.log('Password change initiated.');
+                    alert('Password change initiated successfully!');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

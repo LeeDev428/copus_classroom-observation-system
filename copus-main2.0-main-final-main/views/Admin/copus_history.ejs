@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<style>
+  /* --- Root Variables --- */
+:root {
+  --primary-color-start: #0f2027; /* Dark blue */
+  --primary-color-end: #203a43; /* Darker blue */
+  --secondary-color-start: #2c5364; /* Blue-green */
+  --secondary-color-end: #203a43; /* Darker blue */
+  --text-light: #e0e0e0;
+  --text-dark: #333;
+  --sidebar-width: 280px;
+  --accent-color: #17e891; /* A vibrant green for accents */
+  --danger-color: #e74c3c; /* Red for logout/cancel */
+  --card-bg-transparent: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Base Styles --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: var(--text-light);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+/* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+   background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Main Content --- */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  min-height: 100vh;
+  padding-top: 5rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Search Bar --- */
+.form-control {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
+}
+
+.form-control::placeholder {
+  color: rgba(224, 224, 224, 0.5);
+}
+
+/* --- Table Styles --- */
+.table-responsive {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 1.5rem;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  color: var(--text-light);
+}
+
+.custom-table thead tr th {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  color: #fff;
+  padding: 1rem;
+  text-align: left;
+  border: none;
+}
+
+.custom-table thead tr th:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.custom-table thead tr th:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.custom-table tbody tr {
+  background-color: var(--card-bg-transparent);
+  transition: background-color 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-table tbody td {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.custom-table tbody tr td:first-child {
+  border-left: 1px solid var(--border-color);
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.custom-table tbody tr td:last-child {
+  border-right: 1px solid var(--border-color);
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.text-success {
+  color: var(--accent-color) !important;
+}
+
+/* --- Pagination --- */
+.pagination .page-item .page-link {
+  background-color: var(--card-bg-transparent);
+  border-color: var(--border-color);
+  color: var(--text-light);
+  border-radius: 8px;
+  margin: 0 5px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pagination .page-item.active .page-link {
+  background: var(--secondary-color-start);
+  border-color: var(--secondary-color-start);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.pagination .page-item .page-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .custom-sidebar {
+    transform: translateX(-100%);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 2rem;
+  }
+  .section-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .custom-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    box-shadow: none;
+    padding-bottom: 0;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+}
+</style>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+     <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+  <hr>
+  <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+  <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+  <a href="/admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+  <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+  <a href="/admin_copus_history" class="active"><i class="bi bi-clock-history"></i> Copus History</a>
+  <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+  <hr>
+  <form action="/logout" method="POST">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form>
+</div>
+
+      <!-- Main content -->
+      <main class="main-content">
+  <h1 class="section-title">COPUS HISTORY</h1>
+
+  <!-- Search bar -->
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap">
+    <input type="text" id="searchInput" class="form-control" style="max-width: 300px;" placeholder="Search history...">
+  </div>
+
+  <!-- Table wrapper -->
+  <div class="table-responsive">
+    <table class="table table-hover custom-table" id="historyTable">
+      <thead class="table-primary text-center">
+        <tr>
+          <th>FULLNAME</th>
+          <th>DATE</th>
+          <th>TIME</th>
+          <th>YEAR / GRADE</th>
+          <th>SEMESTER</th>
+          <th>SUBJECT</th>
+          <th>MODALITY</th>
+          <th>OBSERVER</th>
+          <th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Example row -->
+        <tr>
+          <td>Jerald R Espares</td>
+          <td>02-11-2025</td>
+          <td>8:00 am - 10:00 am</td>
+          <td>Year 3</td>
+          <td>2</td>
+          <td>ITE 293 Networking 2</td>
+          <td>FLEX</td>
+          <td>Evelyn Juliano</td>
+          <td class="text-success fw-bold">Completed</td>
+        </tr>
+        <!-- Additional rows will be inserted dynamically or server-side -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination controls -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center" id="pagination">
+      <!-- JS will populate this -->
+    </ul>
+  </nav>
+</main>
+
+  </div>
+  <script src="/js/Super_Admin/copus_history.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const table = document.getElementById("historyTable");
+    const rows = Array.from(table.querySelectorAll("tbody tr"));
+    const searchInput = document.getElementById("searchInput");
+    const pagination = document.getElementById("pagination");
+    const rowsPerPage = 5;
+    let currentPage = 1;
+    let filteredRows = [...rows];
+
+    function renderTable(page, data) {
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+
+      rows.forEach(row => row.style.display = "none");
+      data.slice(start, end).forEach(row => row.style.display = "");
+
+      renderPagination(data.length);
+    }
+
+    function renderPagination(totalRows) {
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      pagination.innerHTML = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement("li");
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<button class="page-link">${i}</button>`;
+        li.addEventListener("click", () => {
+          currentPage = i;
+          renderTable(currentPage, filteredRows);
+        });
+        pagination.appendChild(li);
+      }
+    }
+
+    function filterRows() {
+      const query = searchInput.value.toLowerCase();
+      filteredRows = rows.filter(row => 
+        row.innerText.toLowerCase().includes(query)
+      );
+      currentPage = 1;
+      renderTable(currentPage, filteredRows);
+    }
+
+    // Initial render
+    renderTable(currentPage, filteredRows);
+
+    // Event Listeners
+    searchInput.addEventListener("input", filterRows);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>COPUS Summary Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/css/Observer/copus_summary.css">
+   <style>
+    .logo img {
+  height: 60px;     /* Adjust height as needed */
+  width: auto;      /* Maintain aspect ratio */
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+<!-- Main Content -->
+<main class="container py-4">
+  <h2 class="hu fw-bold mb-4">COPUS SUMMARY RESULT</h2>
+  <hr class="bu">
+
+  <!-- Summary Info -->
+  <div class="d-flex align-items-start justify-content-between mb-3 p-3 rounded title-bar" style="gap: 40px;">
+    <div class="d-flex flex-column" style="flex: 1;">
+      <p class="d-flex justify-content-between"><span class="summary-label">Date:</span> <span class="hu">September 11, 2025</span></p>
+      <p class="d-flex justify-content-between"><span class="summary-label">Year / Grade Level:</span> <span class="hu">Y3</span></p>
+      <p class="d-flex justify-content-between"><span class="summary-label">Subject:</span> <span class="hu">ITE 6989 Capstone 1</span></p>
+    </div>
+  
+    <!-- Vertical Divider -->
+    <div style="width: 2px; background-color: #2d4e89; height: 100%; min-height: 100px;"></div>
+
+  
+    <div class="d-flex flex-column" style="flex: 1;">
+      <p class="d-flex justify-content-between"><span class="summary-label">Semester:</span> <span class="hu">S1</span></p>
+      <p class="d-flex justify-content-between"><span class="summary-label">Modality:</span> <span class="hu">FLEX</span></p>
+      <p class="d-flex justify-content-between"><span class="summary-label">Observer:</span> <span class="hu">Evelyn Juliano</span></p>
+    </div>
+  </div>  
+  <hr class="bu">
+
+<!-- COPUS 1 -->
+<h2 class="hu">COPUS #1</h2>
+<div class="sh">
+  <!-- Student Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="studentChart1" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #007bff;"></span> Listening (L)</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Individual Thinking (Ind)</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Group Activity (Grp)</li>
+            <li><span class="legend-color" style="background-color: #6c757d;"></span> Other</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Student Actions: 0.00%</div>
+    </div>          
+  </div>
+
+  <!-- Teacher Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="teacherChart1" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #007bff;"></span> Listening (L)</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Individual Thinking (Ind)</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Group Activity (Grp)</li>
+            <li><span class="legend-color" style="background-color: #6c757d;"></span> Other</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Teacher Actions: 0.00%</div>
+    </div>    
+  </div>
+  <!-- Engagement Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="copusChart1" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #28a745;"></span> High</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Medium</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Low</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Level of Engagement</div>
+    </div>    
+  </div>
+</div>
+
+<!-- COPUS 2 -->
+<h2 class="hu">COPUS #2</h2>
+<div class="sh">
+  <!-- Student Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="studentChart2" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #007bff;"></span> Listening (L)</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Individual Thinking (Ind)</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Group Activity (Grp)</li>
+            <li><span class="legend-color" style="background-color: #6c757d;"></span> Other</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Student Actions: 0.00%</div>
+    </div>          
+  </div>
+
+  <!-- Teacher Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="teacherChart2" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #007bff;"></span> Listening (L)</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Individual Thinking (Ind)</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Group Activity (Grp)</li>
+            <li><span class="legend-color" style="background-color: #6c757d;"></span> Other</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Teacher Actions: 0.00%</div>
+    </div>    
+  </div>
+  <!-- Engagement Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="copusChart2" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #28a745;"></span> High</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Medium</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Low</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Level of Engagement</div>
+    </div>    
+  </div>
+</div>
+
+<!-- COPUS 3 -->
+<h2 class="hu">COPUS #3</h2>
+<div class="sh">
+  <!-- Student Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="studentChart3" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #007bff;"></span> Listening (L)</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Individual Thinking (Ind)</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Group Activity (Grp)</li>
+            <li><span class="legend-color" style="background-color: #6c757d;"></span> Other</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Student Actions: 0.00%</div>
+    </div>          
+  </div>
+
+  <!-- Teacher Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="teacherChart3" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #007bff;"></span> Listening (L)</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Individual Thinking (Ind)</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Group Activity (Grp)</li>
+            <li><span class="legend-color" style="background-color: #6c757d;"></span> Other</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Teacher Actions: 0.00%</div>
+    </div>    
+  </div>
+  <!-- Engagement Chart -->
+  <div class="uu chart-col">
+    <div class="chart-box">
+      <div class="chart-content d-flex justify-content-between">
+        <div class="chart-canvas d-flex justify-content-center align-items-center">
+          <canvas id="copusChart3" width="200" height="200"></canvas>
+        </div>
+        <div class="chart-legend ps-4">
+          <ul class="list-unstyled">
+            <li><span class="legend-color" style="background-color: #28a745;"></span> High</li>
+            <li><span class="legend-color" style="background-color: #ffc107;"></span> Medium</li>
+            <li><span class="legend-color" style="background-color: #dc3545;"></span> Low</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chart-footer">Level of Engagement</div>
+    </div>    
+  </div>
+</div>
+
+<form action="/Observer_copus_result" method="get">
+  <button type="submit" class="result-btn">DONE</button>
+</form>        
+</main>
+
+<script src="/js/Observer/copus_summary.js"></script>
+</body>
+</html>

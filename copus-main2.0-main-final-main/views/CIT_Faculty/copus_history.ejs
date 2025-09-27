@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIT Faculty History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        /* Header styles */
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logo img {
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-left: -150px;
+        }
+        
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .header-icons i {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .header-icons i:hover {
+            color: #17e891;
+        }
+        .user-icon-circle {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+        }
+
+        /* Sidebar styles */
+        .custom-sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #11405b, #0f2027);
+
+            color: var(--text-light);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        .custom-sidebar h6 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+        .custom-sidebar small {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .custom-sidebar hr {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+        .custom-sidebar a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .custom-sidebar a i {
+            font-size: 1.25rem;
+        }
+        .custom-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #17e891;
+        }
+        .custom-sidebar a.active {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+        .logout-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main content styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 7rem 2rem 2rem 2rem;
+        }
+        
+        .main-content h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Table styles */
+        .table-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+        }
+
+        thead tr {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+        
+        th {
+            font-weight: 600;
+            color: #17e891;
+            text-transform: uppercase;
+        }
+
+        td {
+            color: var(--text-light);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        #searchInput {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+        }
+
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Status Badges */
+        .status-completed {
+            color: #2ecc71; /* Green */
+            font-weight: 600;
+        }
+        .status-cancelled {
+            color: #e74c3c; /* Red */
+            font-weight: 600;
+        }
+        .status-pending {
+            color: #f1c40f; /* Yellow */
+            font-weight: 600;
+        }
+
+        /* No results message in table */
+        tbody td[colspan="13"] {
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+   
+
+    <div class="custom-sidebar">
+        <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/CIT_Faculty_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="CIT_Faculty_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+        <a href="/CIT_Faculty_copus_history" class="active"><i class="bi bi-clock-history"></i> Copus History</a>
+        <a href="/CIT_Faculty_schedule_management"><i class="bi bi-calendar-event-fill"></i>My Schedule</a>
+        <a href="/CIT_Faculty_available_schedule"><i class="bi bi-calendar-plus"></i> Find Schedule Slot</a>
+        <a href="/CIT_Faculty_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <main class="main-content">
+        <h1>PERSONAL COPUS HISTORY</h1>
+
+        <div class="table-container">
+            <div class="table-header">
+                <input type="text" id="searchInput" placeholder="Search..." class="form-control">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>FULLNAME</th>
+                        <th>DEPARTMENT</th>
+                        <th>DATE</th>
+                        <th>START TIME</th>
+                        <th>END TIME</th>
+                        <th>YEAR LEVEL</th>
+                        <th>SEMESTER</th>
+                        <th>SUBJECT CODE</th>
+                        <th>SUBJECT NAME</th>
+                        <th>OBSERVER</th>
+                        <th>MODE</th>
+                        <th>COPUS</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <% if (completedSchedules && completedSchedules.length > 0) { %>
+                        <% completedSchedules.forEach(schedule => { %>
+                            <tr>
+                                <td><%= schedule.firstname %> <%= schedule.lastname %></td>
+                                <td><%= schedule.department %></td>
+                                <td><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+                                <td><%= schedule.start_time %></td>
+                                <td><%= schedule.end_time %></td>
+                                <td><%= schedule.year_level %></td>
+                                <td><%= schedule.semester %></td>
+                                <td><%= schedule.subject_code %></td>
+                                <td><%= schedule.subject %></td>
+                                <td><%= schedule.observer %></td>
+                                <td><%= schedule.modality %></td>
+                                <td><%= schedule.copus %></td>
+                                <% 
+                                    let statusClass = '';
+                                    if (schedule.status.toLowerCase() === 'completed') {
+                                        statusClass = 'status-completed';
+                                    } else if (schedule.status.toLowerCase() === 'cancelled') {
+                                        statusClass = 'status-cancelled';
+                                    } else if (schedule.status.toLowerCase() === 'pending') {
+                                        statusClass = 'status-pending';
+                                    }
+                                %>
+                                <td class="<%= statusClass %>"><%= schedule.status %></td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="13" style="text-align: center;">No COPUS schedules found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const tableBody = document.getElementById('historyTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+
+            searchInput.addEventListener('keyup', function() {
+                const filter = searchInput.value.toLowerCase();
+                let hasVisibleRow = false;
+
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.cells.length < 2) continue; // Skip the "No data" row if it exists
+
+                    let rowText = '';
+                    for (let j = 0; j < row.cells.length; j++) {
+                        rowText += row.cells[j].textContent.toLowerCase() + ' ';
+                    }
+
+                    if (rowText.includes(filter)) {
+                        row.style.display = '';
+                        hasVisibleRow = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

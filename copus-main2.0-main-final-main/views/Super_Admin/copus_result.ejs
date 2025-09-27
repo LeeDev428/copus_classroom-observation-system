@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Super Admin Copus Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* --- Root Variables --- */
+:root {
+  --primary-color-start: #0f2027; /* Dark blue */
+  --primary-color-end: #203a43; /* Darker blue */
+  --secondary-color-start: #2c5364; /* Blue-green */
+  --secondary-color-end: #203a43; /* Darker blue */
+  --text-light: #e0e0e0;
+  --text-dark: #333;
+  --sidebar-width: 280px;
+  --accent-color: #17e891; /* A vibrant green for accents */
+  --danger-color: #e74c3c; /* Red for logout/cancel */
+  --card-bg-transparent: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Base Styles --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: var(--text-light);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+/* --- Header Styles --- */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(to right, #ffffff, #f0f0f0);
+  color: var(--text-dark);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 70px; /* Consistent height */
+}
+
+.logo img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  margin-left: 10px;
+  margin-top: -5px;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-right: 10px;
+}
+
+.header-icons i {
+  font-size: 1.5rem;
+  color: #555;
+  cursor: pointer;
+}
+
+.user-icon-circle {
+  width: 40px;
+  height: 40px;
+  background-color: #ddd;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-icon-circle i {
+  font-size: 1.5rem;
+  color: #777;
+}
+
+/* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+ background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.main-content {
+  padding: 2.5rem;
+  min-height: calc(100vh - 70px);
+  margin-top: 70px;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.header-section h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+}
+
+/* --- Search Input --- */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.form-control {
+  width: 100%;
+  max-width: 600px;
+  padding: 0.9rem 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 15px rgba(23, 232, 145, 0.4);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: rgba(224, 224, 224, 0.6);
+}
+
+/* --- Cards Grid --- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.result-card {
+  background: linear-gradient(145deg, rgba(20, 32, 38, 0.9), rgba(30, 50, 60, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.result-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.45);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  margin: 0;
+}
+
+.badge {
+  background-color: var(--accent-color);
+  color: var(--primary-color-start);
+  padding: 0.4rem 0.9rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.card-body {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.info-group p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.info-group strong {
+  color: #87ceeb;
+  font-weight: 500;
+}
+
+.highlight-info {
+  color: #fff;
+  font-weight: 600;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.btn-view-result,
+.btn-schedule-appointment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.3s, background-color 0.3s;
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+}
+
+.btn-view-result {
+  background: linear-gradient(to right, #17e891, #17c87c);
+  color: var(--text-dark);
+  border: none;
+}
+
+.btn-view-result:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(23, 232, 145, 0.3);
+}
+
+.btn-schedule-appointment {
+  background: linear-gradient(to right, #6a82fb, #fc5c7d);
+  color: #fff;
+  border: none;
+}
+
+.btn-schedule-appointment:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(106, 130, 251, 0.3);
+}
+
+/* --- No records message --- */
+.no-records-message {
+  text-align: center;
+  padding: 5rem 0;
+  color: rgba(224, 224, 224, 0.7);
+  font-size: 1.5rem;
+}
+
+.no-records-message i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: rgba(224, 224, 224, 0.5);
+}
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+     <div class="custom-sidebar">
+  <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+  <hr>
+  <a href="/super_admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+  <a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+   <a href="/super_admin_copus"><i class="bi bi-book"></i> Copus</a>
+  <a href="/super_admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+  <a href="/super_admin_copus_result" class="active"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+  <a href="/super_admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+  <a href="/super_admin_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+  <hr>
+  <form action="/logout" method="POST">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form> 
+</div>
+
+
+      <main class="main-content">
+  <div class="header-section">
+    <h1>Copus Results</h1>
+    <p class="subtitle">View and manage completed observation results.</p>
+  </div>
+  <div class="search-container">
+    <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, department, or subject...">
+  </div>
+
+  <% if (completedSchedules && completedSchedules.length > 0) { %>
+  <div class="cards-grid">
+    <% completedSchedules.forEach(schedule => { %>
+    <div
+      class="result-card"
+      data-fullname="<%= (schedule.firstname + ' ' + schedule.lastname).toLowerCase() %>"
+    >
+      <div class="card-header">
+        <h3 class="card-title"><%= schedule.firstname %> <%= schedule.lastname %></h3>
+        <span class="badge"><%= schedule.copus %></span>
+      </div>
+      <div class="card-body">
+        <div class="info-group">
+          <p><strong>Department:</strong> <%= schedule.department %></p>
+          <p><strong>Subject:</strong> <%= schedule.subject %> (<%= schedule.subject_code %>)</p>
+        </div>
+        <div class="info-group">
+          <p><strong>Date:</strong> <span class="highlight-info"><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span></p>
+          <p><strong>Observer:</strong> <%= schedule.observer %></p>
+        </div>
+        <div class="info-group">
+          <p><strong>Time:</strong> <%= schedule.start_time %> - <%= schedule.end_time %></p>
+          <p><strong>Modality:</strong> <%= schedule.modality %></p>
+        </div>
+      </div>
+      <div class="card-actions">
+        <%
+          let resultRoute = '';
+          if (schedule.copus === 'Copus 1') {
+            resultRoute = `/observer_copus_result1/${schedule._id}`;
+          } else if (schedule.copus === 'Copus 2') {
+            resultRoute = `/observer_copus_result2/${schedule._id}`;
+          } else if (schedule.copus === 'Copus 3') {
+            resultRoute = `/observer_copus_result3/${schedule._id}`;
+          } else {
+            resultRoute = `/observer_copus_result`;
+          }
+        %>
+        <a href="<%= resultRoute %>" class="btn-view-result">
+          <i class="bi bi-eye-fill"></i> View Result
+        </a>
+        <button
+          type="button"
+          class="btn-schedule-appointment"
+          data-bs-toggle="modal"
+          data-bs-target="#scheduleAppointmentModal"
+          data-name="<%= schedule.firstname + ' ' + schedule.lastname %>"
+        >
+          <i class="bi bi-calendar-plus-fill"></i> Schedule Appointment
+        </button>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <% } else { %>
+  <div class="no-records-message">
+    <i class="bi bi-info-circle"></i>
+    <p>No completed observations to display.</p>
+  </div>
+  <% } %>
+</main>
+      
+  </div>
+  <script src="/js/Super_Admin/copus_result.js"></script>
+</body>
+</html>

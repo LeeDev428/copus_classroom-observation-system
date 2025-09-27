@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <table>
+        <th>Role</th>
+        <th>Action</th>
+        <th>Details</th>
+        <th>Time</th>
+        <tbody>
+            <% logs.forEach((log) => { %>
+              <tr>
+                <td><%= log.role %></td>
+                <td><%= log.action %></td>
+                <td><%= log.details %></td>
+                <td><%= new Date(log.timestamp).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+    </table>
+</body>
+</html>

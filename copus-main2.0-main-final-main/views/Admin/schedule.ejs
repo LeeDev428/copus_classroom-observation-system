@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Schedule Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* --- Root Variables --- */
+        :root {
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+            --accent-color: #17e891; /* A vibrant green for accents */
+            --danger-color: #e74c3c; /* Red for logout/cancel */
+            --card-bg-transparent: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Base Styles --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden; /* Use overflow-x instead of hidden to allow vertical scrolling */
+        }
+
+        .container-fluid {
+            padding: 0;
+        }
+
+        .row {
+            margin: 0;
+        }
+
+        /* --- Sidebar --- */
+        .custom-sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #11405b, #0f2027);
+            color: var(--text-light);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            transform: translateX(0); /* Default state */
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .custom-sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .custom-sidebar h6 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-sidebar small {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .custom-sidebar hr {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .custom-sidebar a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .custom-sidebar a i {
+            font-size: 1.25rem;
+        }
+
+        .custom-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .custom-sidebar a.active {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+
+        .logout-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 3rem;
+            min-height: 100vh;
+            width: calc(100% - var(--sidebar-width)); /* Adjust width */
+        }
+        
+        /* Media query for smaller screens */
+        @media (max-width: 992px) {
+            .custom-sidebar {
+                width: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .card-border {
+            background: var(--card-bg-transparent);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .palamig {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 1.5rem;
+        }
+
+        .title-with-icon {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .create-account-wrapper {
+            background: linear-gradient(45deg, #2c5364, #203a43);
+            border-radius: 50%;
+            padding: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .create-account-wrapper:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .create-account-icon {
+            color: #fff;
+            font-size: 1.8rem;
+        }
+
+        /* --- Forms & Inputs --- */
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        .form-control::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        .form-control#userSearchInput {
+            max-width: 250px;
+            height: 35px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
+            color: var(--text-light);
+        }
+
+        .rar {
+            color: var(--danger-color);
+        }
+
+        /* --- Tables --- */
+        .table-responsive {
+            margin-top: 1.5rem;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            color: var(--text-light);
+        }
+
+        .custom-table thead tr th {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            color: #fff;
+            padding: 1rem;
+            text-align: left;
+            border: none;
+        }
+
+        .custom-table thead tr th:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .custom-table thead tr th:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .custom-table tbody tr {
+            background-color: var(--card-bg-transparent);
+            transition: background-color 0.2s ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-table tbody td {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-table tbody tr td:first-child {
+            border-left: 1px solid var(--border-color);
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .custom-table tbody tr td:last-child {
+            border-right: 1px solid var(--border-color);
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            font-weight: 500;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            border: none;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #17e891, #17c87c);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            border: none;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        /* --- Badges --- */
+        .badge {
+            padding: 0.5em 0.8em;
+            font-size: 0.85em;
+            font-weight: bold;
+            border-radius: 50px;
+        }
+
+        .bg-warning {
+            background-color: #f1c40f !important;
+            color: var(--text-dark) !important;
+        }
+
+        .bg-success {
+            background-color: #2ecc71 !important;
+        }
+
+        .bg-danger {
+            background-color: var(--danger-color) !important;
+        }
+
+        /* --- Modals --- */
+        .modal-content {
+            background-color: var(--primary-color-start);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            border-bottom: none;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            color: #fff;
+        }
+
+        .modal-header.bg-danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b) !important;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- Pagination --- */
+        .pagination .page-item .page-link {
+            background-color: var(--card-bg-transparent);
+            border-color: var(--border-color);
+            color: var(--text-light);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--secondary-color-start);
+            border-color: var(--secondary-color-start);
+            color: #fff;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* New styles for the container design */
+        .container-wrapper {
+            background-color: #1a2b33;
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin-left: 15px; /* Center the container in the main content area */
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin: 0;
+        }
+        .add-button {
+            background-color: #17e891;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+        .add-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        .add-button i {
+            color: #1a2b33;
+            font-size: 2rem;
+        }
+        .search-bar {
+            background-color: #203a43;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            color: var(--text-light);
+            padding: 5px;
+        }
+        .search-input::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+   .btn-view {
+    background-color: #17e891;
+    color: #1a2b33;
+    border: none;
+    padding: 10px 20px; /* Increased padding for a larger size */
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    font-size: 1rem; /* Added font size for better text visibility */
+}
+        .btn-view:hover {
+            background-color: #17c87c;
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+        <a href="/admin_schedule"  class="active"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+        <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+        <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+        <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="container-wrapper">
+            <div class="header">
+                <h2>SCHEDULES</h2>
+                <div class="add-button" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                    <i class="bi bi-plus-lg"></i>
+                </div>
+            </div>
+            <div class="search-bar">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search by name, email, role...">
+</div>
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID #</th>
+                            <th>Last Name</th>
+                            <th>First Name</th>
+                            <th>Role</th>
+                            <th>PHINMA E-mail</th>
+                            <th>Department</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                   <tbody>
+    <% if (schedules && schedules.length > 0) { %>
+        <% schedules.forEach(function(schedule, index) { %>
+            <tr>
+                <th scope="row"><%= index + 1 %></th>
+                <td><%= schedule.faculty_user_id.firstname %> <%= schedule.faculty_user_id.lastname %></td>
+                <td><%= schedule.createdAt.toLocaleDateString() %></td>
+                <td>
+                    <button class="btn btn-sm btn-info view-schedule-btn"
+                        data-bs-toggle="modal"
+                        data-bs-target="#viewScheduleModal"
+                        data-fullname="<%= schedule.faculty_user_id.firstname %> <%= schedule.faculty_user_id.lastname %>"
+                        data-image="<%= schedule.image_path %>">
+                        View
+                    </button>
+                </td>
+            </tr>
+        <% }); %>
+    <% } else { %>
+        <tr>
+            <td colspan="4" class="text-center">No schedules found.</td>
+        </tr>
+    <% } %>
+</tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <ul class="pagination" id="pagination"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="createScheduleModal" tabindex="-1" aria-labelledby="createScheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createScheduleModalLabel">Create New Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createScheduleForm">
+                        <div class="mb-3">
+                            <label for="userNameSelect" class="form-label">Select Faculty User</label>
+                            <select class="form-select" id="userNameSelect" name="faculty_user_id" required>
+                                <option value="" disabled selected>Choose a faculty user</option>
+                                <% employees.forEach(employee => { %>
+                                    <% if (employee.role === 'Faculty') { %>
+                                        <option value="<%= employee._id %>" 
+                                                data-firstname="<%= employee.firstname %>" 
+                                                data-lastname="<%= employee.lastname %>"
+                                                data-department="<%= employee.department %>">
+                                            <%= employee.firstname %> <%= employee.lastname %> (<%= employee.employeeId %>)
+                                        </option>
+                                    <% } %>
+                                <% }); %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="imageUpload" class="form-label">Upload Image</label>
+                            <input class="form-control" type="file" id="imageUpload" accept="image/*" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Save Schedule</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewScheduleModal" tabindex="-1" aria-labelledby="viewScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewScheduleModalLabel">Schedule for <span id="scheduleUserFullName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="scheduleImage" src="" alt="Faculty Schedule" class="img-fluid rounded shadow-lg">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Existing School Year Logic ---
+        const schoolYearInput = document.getElementById('school_year');
+        if (schoolYearInput) {
+            const currentYear = new Date().getFullYear();
+            const nextYear = currentYear + 1;
+            schoolYearInput.value = `${currentYear}-${nextYear}`;
+        }
+        // --- End Existing School Year Logic ---
+
+        // --- New Observer Selection Limit Logic ---
+        const observerSelect = document.getElementById('observer_user_id');
+        if (observerSelect) {
+            observerSelect.addEventListener('change', function() {
+                const maxSelections = 3;
+                if (this.selectedOptions.length > maxSelections) {
+                    alert(`You can select a maximum of ${maxSelections} observers.`);
+                    const lastSelected = this.selectedOptions[this.selectedOptions.length - 1];
+                    lastSelected.selected = false;
+                }
+            });
+        }
+        // --- End Observer Selection Limit Logic ---
+
+        // --- Logic to show conflict error modal ---
+        const conflictErrorMessage = `<%= typeof error_modal !== 'undefined' ? error_modal : '' %>`;
+        const conflictErrorModalElement = document.getElementById('conflictErrorModal');
+        const conflictErrorModalBody = document.getElementById('conflictErrorModalBody');
+
+        if (conflictErrorMessage.trim() !== '') {
+            conflictErrorModalBody.innerHTML = conflictErrorMessage;
+            const conflictErrorModal = new bootstrap.Modal(conflictErrorModalElement);
+            conflictErrorModal.show();
+        }
+        // --- End logic to show conflict error modal ---
+
+        // --- Start of NEW pagination logic ---
+        const rowsPerPage = 5;
+        const paginationContainer = document.getElementById('pagination');
+        const scheduleTableBody = document.querySelector('.custom-table tbody');
+        let allRows = Array.from(scheduleTableBody.querySelectorAll('tr'));
+        let currentPage = 1;
+        const maxPagesToShow = 5;
+
+        function displayRows(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            allRows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? '' : 'none';
+            });
+        }
+
+        function renderPagination() {
+            if (!paginationContainer) return;
+            const totalRows = allRows.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            paginationContainer.style.display = 'flex';
+            paginationContainer.innerHTML = '';
+
+            // "Previous" button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>`;
+            paginationContainer.appendChild(prevLi);
+            prevLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPagination();
+                }
+            });
+
+            // Calculate the start and end of the page links to show
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+            // Adjust if we are at the end
+            if (endPage - startPage + 1 < maxPagesToShow) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            // Ellipsis for the beginning
+            if (startPage > 1) {
+                const firstPageLi = document.createElement('li');
+                firstPageLi.className = 'page-item';
+                firstPageLi.innerHTML = `<a class="page-link" href="#">1</a>`;
+                firstPageLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = 1;
+                    renderPagination();
+                });
+                paginationContainer.appendChild(firstPageLi);
+
+                if (startPage > 2) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                    paginationContainer.appendChild(ellipsisLi);
+                }
+            }
+
+            // Numbered pages
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                paginationContainer.appendChild(li);
+                li.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderPagination();
+                });
+            }
+
+            // Ellipsis for the end
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsisLi = document.createElement('li');
+                    ellipsisLi.className = 'page-item disabled';
+                    ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                    paginationContainer.appendChild(ellipsisLi);
+                }
+
+                const lastPageLi = document.createElement('li');
+                lastPageLi.className = 'page-item';
+                lastPageLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                lastPageLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentPage = totalPages;
+                    renderPagination();
+                });
+                paginationContainer.appendChild(lastPageLi);
+            }
+
+            // "Next" button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>`;
+            paginationContainer.appendChild(nextLi);
+            nextLi.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPagination();
+                }
+            });
+
+            displayRows(currentPage);
+        }
+
+        renderPagination();
+        // --- End of NEW pagination logic ---
+
+         // CORRECT MODAL AND FORM SUBMISSION LOGIC
+        const createScheduleForm = document.getElementById('createScheduleForm');
+        const createScheduleModal = new bootstrap.Modal(document.getElementById('createScheduleModal'));
+
+        createScheduleForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const facultyUserId = document.getElementById('userNameSelect').value;
+            const imageFile = document.getElementById('imageUpload').files[0];
+
+            formData.append('faculty_user_id', facultyUserId);
+            formData.append('schedule_image', imageFile);
+
+            try {
+                const response = await fetch('/admin_schedule/create', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Schedule created successfully!');
+                    createScheduleModal.hide();
+                    location.reload(); // Reload the page to show the new schedule from the database
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Network or server error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+        // END CORRECT MODAL AND FORM SUBMISSION LOGIC
+
+       // --- Start of NEW View Button Modal Logic ---
+        const viewModal = new bootstrap.Modal(document.getElementById('viewScheduleModal'));
+        const scheduleUserFullName = document.getElementById('scheduleUserFullName');
+        const scheduleImage = document.getElementById('scheduleImage');
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('view-schedule-btn')) {
+                const button = e.target;
+                const fullName = button.getAttribute('data-fullname');
+                const imagePath = button.getAttribute('data-image'); // Get the image path from the server
+                
+                scheduleUserFullName.textContent = fullName;
+                scheduleImage.src = `/${imagePath}`;
+            }
+        });
+        // --- End of NEW View Button Modal Logic ---
+        
+        // --- START OF CORRECTED SEARCH BAR LOGIC ---
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const query = this.value.toLowerCase();
+
+                // Loop through all table rows and show/hide based on the search query
+                allRows.forEach(row => {
+                    const rowText = row.textContent.toLowerCase();
+                    if (rowText.includes(query)) {
+                        row.style.display = ''; // Show the row
+                    } else {
+                        row.style.display = 'none'; // Hide the row
+                    }
+                });
+
+                // Hide pagination when searching, as all rows are being displayed or hidden
+                if (query.trim() !== '') {
+                    paginationContainer.style.display = 'none';
+                } else {
+                    // Restore pagination when the search field is empty
+                    renderPagination();
+                }
+            });
+        }
+        // --- END OF CORRECTED SEARCH BAR LOGIC ---
+    });
+
+   document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('view-schedule-btn')) {
+        const button = e.target;
+        const fullName = button.getAttribute('data-fullname');
+        // Get the image path and replace all backslashes with forward slashes
+        const imagePath = button.getAttribute('data-image').replace(/\\/g, '/');
+
+        const scheduleUserFullName = document.getElementById('scheduleUserFullName');
+        const scheduleImage = document.getElementById('scheduleImage');
+
+        scheduleUserFullName.textContent = fullName;
+        // Construct the public URL for the image
+        scheduleImage.src = `/${imagePath}`; 
+    }
+});
+</script>
+</body>
+</html>

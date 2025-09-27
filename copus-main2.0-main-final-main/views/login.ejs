@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | CIT COPUS</title>
+    <link rel="icon" href="/images/logo.png" type="image/png" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="/css/login.css" />
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="/js/login.js" defer></script>
+  </head>
+  <body>
+    <div class="starfield"></div>
+
+    <div class="main-container">
+      <div class="branding">
+        <h1 class="branding-title">COPUS</h1>
+        <p class="branding-text">
+          A Web and Mobile-Based COPUS System for the CIT Department at
+          PHINMA-Araullo University South Campus
+        </p>
+      </div>
+
+      <div class="login-card">
+        <div class="text-center mb-4">
+          <img
+            src="/images/data-analytics-role.jpg"
+            alt="CIT Logo"
+            class="logo"
+          />
+          <h4 class="mt-3 login-title">CIT COPUS Login</h4>
+        </div>
+        <form method="POST" action="/login" onsubmit="return validateForm(event)">
+          <div class="input-group-container">
+            <label for="employee" class="form-label">Employee's ID</label>
+            <div class="input-group">
+              <span class="input-group-icon">
+                <i class="bi bi-person-badge-fill"></i>
+              </span>
+              <input
+                type="text"
+                id="employee"
+                name="employee"
+                placeholder="Enter your Employee's ID"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="input-group-container">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-icon">
+                <i class="bi bi-lock-fill"></i>
+              </span>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+              />
+              <span
+                class="password-toggle"
+                onclick="togglePasswordVisibility()"
+              >
+                <i class="bi bi-eye-slash-fill" id="toggleIcon"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="input-group-container">
+            <label class="form-label">
+              Human Verification: <span id="math-question"></span> = ?
+            </label>
+            <input
+              type="number"
+              id="humanAnswer"
+              name="humanAnswer"
+              required
+              placeholder="Enter answer"
+              class="form-input"
+            />
+            <input type="hidden" id="correctAnswer" name="correctAnswer" />
+          </div>
+
+          <div class="recaptcha-container">
+            <div
+              class="g-recaptcha"
+              data-sitekey="6LdO1UorAAAAADVb7_8CpvXe0crzY906YgkXtrmX"
+            ></div>
+          </div>
+
+          <div id="errorMessage" class="error-message"></div>
+
+          <button type="submit" class="login-button">Login</button>
+        </form>
+
+        <div class="links-container">
+          <a href="/forgot-password" class="forgot-password-link"
+            >Forgot password?</a
+          >
+          <a href="/" class="back-home-button">
+            <i class="bi bi-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

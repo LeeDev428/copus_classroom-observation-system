@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>COPUS Observation Table</title>
+  <link rel="stylesheet" href="/css/Observer/copus_start.css">
+</head>
+<body>
+
+  <div class="header" id="timer">2:00</div>
+
+  <div class="copus-details card">
+    <h2 class="section-title">COPUS DETAILS</h2>
+    <hr class="bu" />
+
+    <div class="details-grid">
+      <div class="gr">
+        <p><strong>Fullname:</strong> <span><%= copusDetails.fullname %></span></p>
+        <p><strong>Department:</strong> <span><%= copusDetails.department %></span></p>
+        <p><strong>Date:</strong> <span><%= copusDetails.date %></span></p>
+        <p><strong>Start Time:</strong> <span><%= copusDetails.startTime %></span></p>
+        <p><strong>End Time:</strong> <span><%= copusDetails.endTime %></span></p>
+        <p><strong>Year / Grade Level:</strong> <span><%= copusDetails.yearLevel %></span></p>
+      </div>
+
+      <div class="gr">
+        <p><strong>Semester:</strong> <span><%= copusDetails.semester %></span></p>
+        <p><strong>Subject Code:</strong> <span><%= copusDetails.subjectCode %></span></p>
+        <p><strong>Subject Name:</strong> <span><%= copusDetails.subjectName %></span></p>
+        <p><strong>Mode:</strong> <span><%= copusDetails.mode %></span></p>
+        <p><strong>Observer:</strong> <span><%= copusDetails.observer %></span></p>
+      </div>
+    </div>
+
+    <hr class="bu" />
+    <p class="instructions">
+      <strong>Instructions:</strong> For each 2-minute interval, check columns to show what's happening in each category. Check multiple columns where appropriate.
+    </p>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 30px 0 30px;">
+    <h2 style="color: #2f5597; margin: 0;">COPUS 3</h2>
+
+    <div>
+      <button type="button" id="startBtn">
+        ⏱️ <span class="btn-text">Start Timer</span>
+      </button>
+
+      <button type="submit" id="submitBtn">
+        ✅ <span class="btn-text">SUBMIT</span>
+        <span class="spinner" style="display:none;"></span>
+      </button>
+    </div>
+  </div>
+
+   <form id="copusForm" method="POST" action="/super_admin_copus_result3">
+    <div id="tablesContainer"></div>
+  </form>
+
+  <script src="/js/Super_Admin/copus_start3.js"></script>
+
+</body>
+</html>

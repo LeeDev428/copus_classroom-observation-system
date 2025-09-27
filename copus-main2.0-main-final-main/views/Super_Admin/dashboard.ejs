@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Super Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* --- Root Variables --- */
+:root {
+  --primary-color-start: #0f2027; /* Dark blue */
+  --primary-color-end: #203a43; /* Darker blue */
+  --secondary-color-start: #2c5364; /* Blue-green */
+  --secondary-color-end: #203a43; /* Darker blue */
+  --text-light: #e0e0e0;
+  --text-dark: #333;
+  --sidebar-width: 280px;
+  --accent-color: #17e891; /* A vibrant green for accents */
+  --danger-color: #e74c3c; /* Red for logout/cancel */
+  --card-bg-transparent: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Base Styles --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: var(--text-light);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+/* --- Header Styles --- */
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  transition: left 0.3s ease-in-out;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  width: 50px;
+  height: auto;
+  margin-right: 15px;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-right i {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.header-right i:hover {
+  color: var(--accent-color);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-icon-circle {
+  background: rgba(255, 255, 255, 0.2);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.25rem;
+  color: var(--text-light);
+}
+
+.welcome-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+/* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Main Content --- */
+.baba {
+  margin-left: 330px;
+  margin-top: 20px; /* Reduced from 1rem to move content higher */
+  padding: 22 1rem 3rem 3rem; /* Adjusted padding-top from -25rem to 0 */
+  transition: margin-left 0.3s ease-in-out;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .baba {
+    padding-top: 5rem; /* Reduced from 10rem to move content higher on mobile */
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+/* --- Metric Cards --- */
+.metric-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.metric-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.metric-icon {
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* --- Chart and Table Styles --- */
+.he {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Make table and calendar fully transparent */
+.table-responsive, #calendar {
+  background-color: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.title-with-icon .bal {
+  margin-left: 0.5rem;
+  color: var(--accent-color);
+  font-size: 1rem;
+}
+
+.data-table {
+  background-color: transparent !important;
+  color: var(--text-light);
+  border: none !important;
+}
+
+.data-table thead tr {
+  background-color: transparent !important;
+}
+
+.data-table th, .data-table td {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* --- Calendar Styling --- */
+#calendar {
+  background: transparent;
+}
+
+.fc-toolbar-title,
+.fc-daygrid-day-number,
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-top {
+  color: var(--text-light) !important;
+}
+
+.fc-button-primary {
+  background-color: var(--secondary-color-start) !important;
+  border-color: var(--secondary-color-start) !important;
+  color: #fff !important;
+}
+
+.fc-button-primary:not(:disabled):active,
+.fc-button-primary:not(:disabled):focus,
+.fc-button-primary:not(:disabled):hover {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+
+.fc-event {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--text-dark);
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 0.8em;
+}
+
+.fc-event-title {
+  white-space: normal;
+}
+
+.fc-daygrid-day-frame {
+  background-color: transparent !important;
+}
+
+.fc-daygrid-day-number {
+  color: var(--text-light);
+}
+
+/* --- Modal Styles --- */
+.modal-content {
+  background-color: var(--primary-color-start);
+  color: var(--text-light);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+}
+
+.modal-header {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  border-bottom: none;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  color: #fff;
+}
+
+.btn-close-white {
+  filter: invert(1);
+}
+
+.list-group-item {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .custom-sidebar {
+    transform: translateX(-100%);
+  }
+  .baba {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    left: 0;
+    top: 0;
+  }
+  .header-left, .header-right {
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .header-title {
+    margin-left: 0;
+  }
+  .baba {
+    padding-top: 10rem;
+  }
+  .metric-container {
+    grid-template-columns: 1fr;
+  }
+}
+</style>          
+</head>
+<body>
+  <header>
+    <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+
+    <div class="header-icons">
+     <i class="bi bi-bell-fill" style="color: black; cursor:pointer;" data-bs-toggle="modal" data-bs-target="#notificationModal"></i>
+
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>  
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/super_admin_dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+          <a href="/super_admin_copus"><i class="bi bi-book"></i> Copus</a>
+         <a href="/super_admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+        <a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+         <a href="/super_admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+        <a href="/super_admin_setting"><i class="bi bi-gear-fill"></i>Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form> 
+      </div>      
+
+      <!-- Main content -->
+     <div class="baba col-md-9 mt-3">
+                <div class="metric-container">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="bi bi-bar-chart-fill"></i></div>
+                        <div class="metric-value"><%= totalObservations %></div> <div class="metric-label">TOTAL OF OBSERVATION</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="bi bi-person-badge-fill"></i></div>
+                        <div class="metric-value"><%= totalObservers %></div> <div class="metric-label">TOTAL OF OBSERVER</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="bi bi-people-fill"></i></div>
+                        <div class="metric-value"><%= totalCitFaculty %></div> <div class="metric-label">TOTAL OF CIT FACULTY</div>
+                    </div>
+                </div>
+          <!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+          <li class="list-group-item">Observer assigned to Jerald Espares on Feb 3, 2025.</li>
+          <li class="list-group-item">New Copus Result uploaded.</li>
+          <li class="list-group-item">User Management updated successfully.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+       <div class="he section-title">
+  <div class="title-with-icon">
+    <span>Average Result of the CIT Faculty in Student Actions</span>
+    <i class="bal bi-caret-down-fill"></i>
+  </div>
+  <canvas id="facultyChart" height="120"></canvas>
+</div>
+
+        <div class="section-title">OBSERVATION HISTORY</div>
+        <div class="table-responsive">
+          <table class="table table-bordered data-table">
+            <thead class="table-light">
+              <tr>
+                <th>ID #</th>
+                <th>DATE</th>
+                <th>START & END TIME</th>
+                <th>YEAR/COURSE LEVEL - CLASS OBSERVE</th>
+                <th>SUBJECT</th>
+                <th>MODALITY OR CLASS SETUP</th>
+                <th>OBSERVER</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+                <!-- Filled row -->
+                <tr>
+                  <td>COPUS 0001</td>
+                  <td>February 3, 2025</td>
+                  <td>10:00 am - 11:00 am</td>
+                  <td>Year 3</td>
+                  <td>ITE 206 Memory Mgt</td>
+                  <td>FLEX</td>
+                  <td>Baylon - Bullena</td>
+                  <td><span class="text-success fw-bold">Completed</span></td>
+                </tr>
+              
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              </tbody>              
+          </table>
+        </div>
+            <div class="section-title mt-4">OBSERVATION CALENDAR</div>
+            <div id="calendar" style="padding: 10px; background-color: #fff; border-radius: 8px;"></div>
+      </div>
+    </div>
+
+  </div>
+  <script src="/js/Super_Admin/dashboard.js"></script>
+  <!-- FullCalendar CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendarEvents = <%- calendarEvents %>;
+
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      height: 500,
+      events: calendarEvents,
+      eventDisplay: 'block'
+    });
+
+    calendar.render();
+  });
+</script>
+
+</body>
+</html>

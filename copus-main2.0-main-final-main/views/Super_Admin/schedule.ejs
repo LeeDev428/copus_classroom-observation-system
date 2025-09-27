@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Admin Schedule Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- Root Variables --- */
+        :root {
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+            --accent-color: #17e891; /* A vibrant green for accents */
+            --danger-color: #e74c3c; /* Red for logout/cancel */
+            --card-bg-transparent: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Base Styles --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* This prevents the body from scrolling */
+        }
+
+        .container-fluid {
+            padding: 0;
+        }
+
+        .row {
+            margin: 0;
+        }
+
+        /* --- Header Styles --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(to right, #ffffff, #f0f0f0);
+            color: var(--text-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 70px;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            margin-left: 10px;
+            margin-top: -5px;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-right: 10px;
+        }
+
+        .header-icons i {
+            font-size: 1.5rem;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .user-icon-circle {
+            width: 40px;
+            height: 40px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-icon-circle i {
+            font-size: 1.5rem;
+            color: #777;
+        }
+        /* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+   background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 1rem;
+            width: calc(100% - var(--sidebar-width));
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+        
+        .card-border {
+            background: var(--card-bg-transparent);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+
+        .custom-table thead tr {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .custom-table tbody tr {
+            background-color: var(--card-bg-transparent);
+            transition: background-color 0.3s ease;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.4em 0.7em;
+            border-radius: 50rem;
+        }
+
+        .observer-entry {
+            display: inline-block;
+            margin-bottom: 3px;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1050;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .toast-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-container button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #pagination .btn {
+            background-color: var(--secondary-color-start);
+            border: 1px solid var(--secondary-color-start);
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        #pagination .btn.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: var(--text-dark);
+        }
+        
+        /* New CSS for centering pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="custom-sidebar">
+                <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+                <small><%= employeeId %></small>
+                <hr>
+                <a href="/super_admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+                <a href="/super_admin_copus"><i class="bi bi-book"></i> Copus</a>
+                <a href="/super_admin_schedule" class="active"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+                <a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+                <a href="/super_admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+                <a href="/super_admin_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+                <hr>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+
+            <div class="main-content">
+                <div class="card-border" id="scheduleManagementView">
+                    <% if (typeof errorMessage !== 'undefined') { %>
+                        <div id="customToast" class="toast-container show">
+                            <span><%= errorMessage %></span>
+                            <button onclick="closeToast()">×</button>
+                        </div>
+                    <% } %>
+                    <% if (success_msg && success_msg.length > 0) { %>
+                        <div id="successToast" class="toast-container show" style="background-color: #4CAF50;">
+                            <span><%= success_msg %></span>
+                            <button onclick="closeToast('successToast')">×</button>
+                        </div>
+                    <% } %>
+                    <% if (error_msg && error_msg.length > 0) { %>
+                        <div id="errorToast" class="toast-container show" style="background-color: #f44336;">
+                            <span><%= error_msg %></span>
+                            <button onclick="closeToast('errorToast')">×</button>
+                        </div>
+                    <% } %>
+
+                    <div class="section-title title-with-icon">
+                        <i class="bi bi-calendar-event-fill"></i><span>MY SCHEDULES</span>
+                    </div>
+                    <div>
+                        <input
+                            type="text"
+                            id="tableSearch"
+                            placeholder="Search my schedules..."
+                            class="search-input"
+                        />
+                        <table id="scheduleTable" class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Date</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Year Level</th>
+                                    <th>Semester</th>
+                                    <th>School Year</th>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Room</th>
+                                    <th>Observer(s)</th> 
+                                    <th>Modality</th>
+                                    <th>Copus</th>
+                                    <th>Overall Schedule Status</th>
+                                    <th>My Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (facultySchedules.length === 0) { %>
+                                        <tr>
+                                            <td colspan="16" class="text-center">No schedule records found for you.</td>
+                                        </tr>
+                                <% } else { %>
+                                                <% facultySchedules.forEach(schedule => { %>
+                                                    <tr>
+                                                        <td><%= schedule.faculty_firstname %> <%= schedule.faculty_lastname %></td>
+                                                        <td><%= schedule.faculty_department %></td>
+                                                        <td><%= new Date(schedule.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></td>
+                                                        <td><%= schedule.start_time %></td>
+                                                        <td><%= schedule.end_time %></td>
+                                                        <td><%= schedule.year_level || 'N/A' %></td> 
+                                                        <td><%= schedule.semester || 'N/A' %></td> 
+                                                        <td><%= schedule.school_year || 'N/A' %></td> 
+                                                        <td><%= schedule.faculty_subject_code || 'N/A' %></td>
+                                                        <td><%= schedule.faculty_subject_name || 'N/A' %></td>
+                                                        <td><%= schedule.faculty_room || schedule.room || 'N/A' %></td>
+                                                        <td>
+                                                            <% if (schedule.observers && Array.isArray(schedule.observers) && schedule.observers.length > 0) { %>
+                                                                <% schedule.observers.forEach(observer => { %>
+                                                                    <span class="observer-entry">
+                                                                        <%= observer.observer_name %>
+                                                                        <% if (observer.observer_status) { %>
+                                                                            <% 
+                                                                                let observerIconClass = 'bi-info-circle-fill text-secondary'; // Default
+                                                                                if (observer.observer_status === 'pending') {
+                                                                                    observerIconClass = 'bi-hourglass-split text-warning';
+                                                                                } else if (observer.observer_status === 'accepted') {
+                                                                                    observerIconClass = 'bi-check-circle-fill text-success';
+                                                                                } else if (observer.observer_status === 'declined') {
+                                                                                    observerIconClass = 'bi-x-circle-fill text-danger';
+                                                                                }
+                                                                            %>
+                                                                            <i class="bi <%= observerIconClass %>" title="<%= 'Observer Status: ' + observer.observer_status %>"></i>
+                                                                        <% } %>
+                                                                    </span><br> 
+                                                                <% }) %>
+                                                            <% } else { %>
+                                                                N/A
+                                                            <% } %>
+                                                        </td>
+                                                        <td><%= schedule.modality || 'N/A' %></td> 
+                                                        <td><%= schedule.copus_type || 'N/A' %></td> 
+                                                    <td>
+                                                        <% 
+                                                            let overallStatusBadgeClass = 'bg-danger'; // Default for unknown status
+                                                            if (schedule.status === 'pending') {
+                                                                overallStatusBadgeClass = 'bg-warning';
+                                                            } else if (schedule.status === 'scheduled') {
+                                                                overallStatusBadgeClass = 'bg-info';
+                                                            } else if (schedule.status === 'approved') {
+                                                                overallStatusBadgeClass = 'bg-primary';
+                                                            } else if (schedule.status === 'completed') {
+                                                                overallStatusBadgeClass = 'bg-success';
+                                                            } else if (schedule.status === 'confirmed') {
+                                                                overallStatusBadgeClass = 'bg-info';
+                                                            }
+                                                        %>
+                                                        <span class="badge <%= overallStatusBadgeClass %>">
+                                                            <%= schedule.status %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                                                                
+                                                        <%
+                                                            let myStatusBadgeClass = 'bg-secondary'; // Default
+                                                            if (schedule.myStatus === 'pending') {
+                                                                myStatusBadgeClass = 'bg-warning';
+                                                            } else if (schedule.myStatus === 'accepted') {
+                                                                myStatusBadgeClass = 'bg-success';
+                                                            } else if (schedule.myStatus === 'declined') {
+                                                                myStatusBadgeClass = 'bg-danger';
+                                                            }
+                                                        %>
+                                                        <span class="badge <%= myStatusBadgeClass %>">
+                                                            <%= schedule.myStatus %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <% 
+                                                            // Use the 'myStatus' directly, no need to re-find the observer entry here
+                                                            const superAdminIsAssignedObserver = schedule.myStatus !== 'N/A';
+                                                            const superAdminObserverStatus = schedule.myStatus; // Direct access to the pre-calculated status
+                                                        %>
+                                                        <% if (currentUser.role === 'super_admin' && superAdminIsAssignedObserver && superAdminObserverStatus === 'pending') { %>
+                                                            <form action="/super_admin/schedule/<%= schedule._id %>/accept" method="POST" style="display:inline;">
+                                                                <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                                                            </form>
+                                                            <form action="/super_admin/schedule/<%= schedule._id %>/decline" method="POST" style="display:inline;">
+                                                                <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                                                            </form>
+                                                        <% } else if (currentUser.role === 'super_admin' && superAdminIsAssignedObserver && superAdminObserverStatus === 'accepted' && (schedule.status === 'scheduled' || schedule.status === 'confirmed')) { %>
+                                                            <form action="/super_admin/schedule/complete/<%= schedule._id %>" method="POST" style="display:inline;">
+                                                                <button type="submit" class="btn btn-sm btn-primary">Mark Complete</button>
+                                                            </form>
+                                                        <% } else { %>
+                                                            <button class="btn btn-sm btn-secondary" disabled>No Action</button>
+                                                        <% } %>
+                                                    </td>
+
+                                                    </tr>
+                                                <% }) %>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container" id="pagination"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script>
+    // Functions for toasts
+    function closeToast(toastId = 'customToast') { // Make it flexible for success/error toasts
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            // Remove from DOM after transition to prevent re-showing on navigation
+            setTimeout(() => toast.remove(), 500);
+        }
+    }
+
+    // Auto-hide the toasts after 5 seconds
+    window.addEventListener('DOMContentLoaded', () => {
+        const errorToast = document.getElementById('customToast'); // Your original error toast
+        const successToast = document.getElementById('successToast');
+        const regularErrorToast = document.getElementById('errorToast'); // For flash messages
+
+        if (errorToast) { setTimeout(() => closeToast('customToast'), 5000); }
+        if (successToast) { setTimeout(() => closeToast('successToast'), 5000); }
+        if (regularErrorToast) { setTimeout(() => closeToast('errorToast'), 5000); }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tableSearch');
+    const table = document.getElementById('scheduleTable');
+    const tbody = table.getElementsByTagName('tbody')[0];
+    const pagination = document.getElementById('pagination');
+
+    // Get all original table rows. This needs to be done once.
+    const originalRows = Array.from(tbody.querySelectorAll('tr:not(.text-center)'));
+    let filteredRows = [];
+    let currentPage = 1;
+    const rowsPerPage = 5;
+
+    // --- Search Functionality ---
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+            filteredRows = originalRows.filter(row => {
+                const rowText = row.textContent.toLowerCase();
+                return rowText.includes(searchTerm);
+            });
+        } else {
+            // If search is empty, show all rows
+            filteredRows = [...originalRows];
+        }
+        
+        currentPage = 1; // Always reset to the first page on a new search
+        renderTableAndPagination();
+    }
+
+    searchInput.addEventListener('keyup', performSearch);
+
+    // --- Pagination Functionality ---
+    function renderTableAndPagination() {
+        // Clear table body before rendering
+        tbody.innerHTML = ''; 
+
+        if (filteredRows.length === 0) {
+            const noRecordsRow = document.createElement('tr');
+            noRecordsRow.innerHTML = `<td colspan="16" class="text-center">No schedule records found for your search.</td>`;
+            tbody.appendChild(noRecordsRow);
+            pagination.innerHTML = ''; // Hide pagination controls
+            return;
+        }
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        
+        filteredRows.slice(startIndex, endIndex).forEach(row => {
+            tbody.appendChild(row); // Append the actual DOM row
+        });
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        pagination.innerHTML = ''; // Clear existing buttons
+
+        if (totalPages <= 1) return; // No pagination needed
+
+        const createButton = (text, page) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.classList.add('btn', 'btn-secondary', 'me-2');
+            if (page === currentPage) {
+                button.classList.add('active');
+            }
+            button.disabled = (page < 1 || page > totalPages);
+            button.addEventListener('click', () => {
+                currentPage = page;
+                renderTableAndPagination();
+            });
+            return button;
+        };
+
+        // Previous button
+        pagination.appendChild(createButton('Prev', currentPage - 1));
+
+        // Page number buttons
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+
+        if (currentPage <= 3) {
+            endPage = Math.min(5, totalPages);
+        } else if (currentPage > totalPages - 2) {
+            startPage = Math.max(1, totalPages - 4);
+        }
+
+        if (startPage > 1) {
+            pagination.appendChild(createButton('1', 1));
+            if (startPage > 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.classList.add('btn', 'btn-secondary', 'disabled', 'me-2');
+                pagination.appendChild(ellipsis);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.appendChild(createButton(i, i));
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.classList.add('btn', 'btn-secondary', 'disabled', 'me-2');
+                pagination.appendChild(ellipsis);
+            }
+            pagination.appendChild(createButton(totalPages, totalPages));
+        }
+
+        // Next button
+        pagination.appendChild(createButton('Next', currentPage + 1));
+    }
+    
+    // Initial render of the table and pagination
+    performSearch();
+});
+
+</script>
+</html>

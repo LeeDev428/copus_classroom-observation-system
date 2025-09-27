@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Observer Copus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+   /* --- Root Variables --- */
+:root {
+  --primary-color-start: #0f2027; /* Dark blue */
+  --primary-color-end: #203a43; /* Darker blue */
+  --secondary-color-start: #2c5364; /* Blue-green */
+  --secondary-color-end: #203a43; /* Darker blue */
+  --text-light: #e0e0e0;
+  --text-dark: #333;
+  --sidebar-width: 280px;
+  --accent-color: #17e891; /* A vibrant green for accents */
+  --danger-color: #e74c3c; /* Red for logout/cancel */
+  --card-bg-transparent: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Base Styles --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: var(--text-light);
+  min-height: 100vh;
+  margin: 0;
+  overflow-y: hidden; /* Prevent body scrolling */
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+/* --- Header Styles --- */
+header {
+  display: none; /* This line hides the header */
+}
+
+/* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+   background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Main Content --- */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  min-height: 100vh;
+  margin-top: 0; /* Changed margin-top to 0 as header is gone */
+  /* Removed overflow-y: auto to prevent scrolling */
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.main-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.approved-schedule-item .row {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.approved-schedule-item .row:last-child {
+  margin-bottom: 0;
+}
+
+.approved-schedule-item strong {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.approved-schedule-item p {
+  margin: 0;
+  color: var(--text-light);
+}
+
+.result-btn {
+  background: linear-gradient(to right, #17e891, #17c87c);
+  border: none;
+  color: var(--text-dark);
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1.5rem;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.result-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .custom-sidebar {
+    transform: translateX(-100%);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 2rem;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+  </style>
+</head>
+<body>
+  <header>
+   <div class="logo">
+  <img src="/images/copus.png" alt="COPUS Logo">
+</div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+     <div class="custom-sidebar">
+                <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+                <small><%= employeeId %></small>
+                <hr>
+                <a href="/super_admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+                <a href="/super_admin_copus" class="active"><i class="bi bi-book"></i> Copus</a>
+                <a href="/super_admin_schedule" ><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+                <a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+                <a href="/super_admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+                <a href="/super_admin_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+                <hr>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+
+      <main class="main-content">
+        <h1>COPUS</h1>
+        <div class="cards">
+          <% if (schedules && schedules.length > 0) { %>
+            <% schedules.forEach(schedule => { %>
+              <div class="card">
+                <div class="approved-schedule-item">
+                  <div class="row">
+                    <div class="col-md-4"><strong>Name:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.firstname %> <%= schedule.lastname %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Department:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.department %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Date:</strong></div>
+                    <div class="col-md-8"><p><%= new Date(schedule.date).toLocaleDateString('en-US') %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Start Time:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.start_time %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>End Time:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.end_time %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Year Level:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.year_level %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Semester:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.semester %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Subject Code:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.subject_code %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Subject Name:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.subject %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Observer:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.observer %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Copus:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.copus %></p></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4"><strong>Mode:</strong></div>
+                    <div class="col-md-8"><p><%= schedule.modality %></p></div>
+                  </div>
+                  <% 
+                    let copusLink = '';
+                    switch (schedule.copus) {
+                      case 'Copus 1':
+                        copusLink = `/super_admin_copus_start_copus1/${schedule._id}`;
+                        break;
+                      case 'Copus 2':
+                        copusLink = `/super_admin_copus_start_copus2/${schedule._id}`;
+                        break;
+                      case 'Copus 3':
+                        copusLink = `/super_admin_copus_start_copus3/${schedule._id}`;
+                        break;
+                      default:
+                        copusLink = '#'; // Fallback for unexpected copus values
+                    }
+                  %>
+                  <form action="<%= copusLink %>" method="get">
+                    <button type="submit" class="result-btn">START COPUS</button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p>No approved schedules found.</p>
+          <% } %>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

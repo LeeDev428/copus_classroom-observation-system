@@ -1,0 +1,222 @@
+/* * This file contains the complete CSS for the dashboard,
+ * combining all previously provided styles for a unified design.
+ */
+
+/* =====================================
+ * General Body & Header Styles
+ * ===================================== */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    /* Removed padding-top here, handled by main-content */
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2d4e89;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    z-index: 1100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    background: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-icon-circle {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 2px solid #2d4e89;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-icon-circle i {
+    font-size: 24px;
+    color: #2d4e89;
+}
+
+/* =====================================
+ * Sidebar Styles
+ * ===================================== */
+.custom-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, #2d4e89, #006400);
+    padding: 25px 20px;
+    width: 280px;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.custom-sidebar h6,
+.custom-sidebar small {
+    color: white;
+    font-weight: 600;
+    text-align: center;
+}
+
+.custom-sidebar hr {
+    border: none;
+    height: 1px;
+    background: #eee;
+    margin: 10px 0;
+}
+
+.custom-sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    margin: 5px 0;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.custom-sidebar a i {
+    font-size: 18px;
+}
+
+.custom-sidebar a:hover,
+.custom-sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateX(4px);
+}
+
+.logout-btn:hover {
+    background-color: white;
+    color: #2d4e89;
+}
+
+/* =====================================
+ * Main Content Styles
+ * ===================================== */
+.main-content {
+    /* Corrected margin to match sidebar width */
+    margin-left: 280px; 
+    /* Added padding-top to account for the fixed header */
+    padding-top: 80px;
+    width: calc(100% - 280px);
+    padding: 40px;
+    background-color: #f4f7fb;
+    min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.main-content h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2d4e89;
+    border-left: 5px solid #2d4e89;
+    padding-left: 15px;
+    background-color: #fff;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* =====================================
+ * Table Styles
+ * ===================================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    border-radius: 10px;
+    overflow: hidden;
+    /* Removed problematic negative margin */
+    margin-top: -7px;
+    /* Added fixed layout to ensure proper column sizing */
+    table-layout: fixed;
+}
+
+th, td {
+    border: 1px solid #d0d7e2;
+    /* Adjusted padding to make cells slightly less wide */
+    padding: 8px;
+    text-align: center;
+    /* Removed white-space: nowrap to allow text to wrap */
+}
+
+th {
+    background-color: #e7effb;
+    color: #2d4e89;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+td {
+    background-color: #fff;
+}
+
+table tr:hover {
+    background-color: #f1f5fa;
+}
+
+/* Status colors for better visibility */
+.status-completed {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-cancelled {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.status-pending {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+
+/* =====================================
+ * Pagination & Search Styles
+ * ===================================== */
+.pagination .page-item.active .page-link {
+    background-color: #2d4e89;
+    border-color: #2d4e89;
+    color: white;
+}
+
+.pagination .page-link {
+    color: #2d4e89;
+    border-radius: 8px;
+    margin: 0 2px;
+}

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin User Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- Root Variables --- */
+        :root {
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+            --accent-color: #17e891; /* A vibrant green for accents */
+            --danger-color: #e74c3c; /* Red for logout/cancel */
+            --card-bg-transparent: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /*
+        --------------------
+        UPDATED BASE STYLES
+        --------------------
+        */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll on the body */
+        }
+
+        .container-fluid {
+            padding: 0;
+        }
+
+        .row {
+            margin: 0;
+        }
+
+        /*
+        --------------------
+        SIDEBAR STYLES
+        --------------------
+        */
+        .custom-sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+           background: linear-gradient(to bottom, #11405b, #0f2027);
+            color: var(--text-light);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        .custom-sidebar h6 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-sidebar small {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .custom-sidebar hr {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .custom-sidebar a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .custom-sidebar a i {
+            font-size: 1.25rem;
+        }
+
+        .custom-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .custom-sidebar a.active {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+
+        .logout-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /*
+        --------------------
+        UPDATED MAIN CONTENT
+        --------------------
+        */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 70vh;
+        }
+
+        .card-border {
+            background: var(--card-bg-transparent);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 1.5rem;
+        }
+
+        .title-with-icon {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .create-account-wrapper {
+            background: linear-gradient(to right, #17e891, #17c87c);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        .create-account-wrapper:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+        }
+
+        .create-account-icon {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        /* --- Search Bar --- */
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        /* --- Table Styles --- */
+        .table-responsive {
+            margin-top: 1.5rem;
+            overflow-x: auto; /* Allow horizontal scroll for table on small screens */
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            color: var(--text-light);
+        }
+
+        .custom-table thead tr th {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            color: #fff;
+            padding: 1rem;
+            text-align: left;
+            border: none;
+        }
+
+        .custom-table thead tr th:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .custom-table thead tr th:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .custom-table tbody tr {
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-table tbody td {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-table tbody tr td:first-child {
+            border-left: 1px solid var(--border-color);
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .custom-table tbody tr td:last-child {
+            border-right: 1px solid var(--border-color);
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* Status and Action Buttons */
+        .toggle-status-btn {
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+
+        .status-active {
+            background-color: #1abc9c;
+            color: #fff;
+        }
+
+        .status-inactive {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .action-edit {
+            color: var(--accent-color);
+            cursor: pointer;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .action-edit:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /*
+        --------------------
+        PAGINATION STYLES
+        --------------------
+        */
+        .pagination {
+            display: flex;
+            padding-left: 0;
+            list-style: none;
+            border-radius: 0.25rem;
+        }
+
+        .page-item {
+            margin: 0 0.25rem;
+            transition: transform 0.2s;
+        }
+
+        .page-item.active .page-link {
+            background: var(--secondary-color-start);
+            border-color: var(--secondary-color-start);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-link {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .page-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /*
+        --------------------
+        MODALS AND FORMS
+        --------------------
+        */
+       .modal {
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: var(--primary-color-start);
+    color: var(--text-light);
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 600px; /* Increased max-width */
+    width: 90%; /* Responsive width */
+}
+        /* Specific style for add modal */
+        #addUserModal .modal-content {
+            width: 700px;
+            max-width: 90%;
+        }
+
+        .success-gif {
+            width: 150px;
+            height: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-content h2 {
+            color: var(--accent-color);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-content p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-content .btn-primary {
+            background: linear-gradient(to right, #17e891, #17c87c);
+            border: none;
+            color: var(--text-dark);
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .modal-content .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+        }
+
+        /* Add/Edit Form Styling */
+        .buga {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+        }
+
+        .palamig {
+            margin-bottom: 1.5rem;
+        }
+
+        .rar {
+            color: #e74c3c;
+            margin-left: 0.25rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .form-select, .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            border-radius: 10px;
+            width: 100%; /* Added width */
+            min-width: 150px; /* Added min-width */
+        }
+        
+        /* Specific width for the select options within the add user modal */
+        #addUserModal .form-select {
+            width: 100%;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
+        }
+
+        .form-select option {
+            background-color: var(--primary-color-end);
+            color: var(--text-light);
+        }
+
+        /* Edit Modal specific styles */
+        #editModal .modal-content {
+            padding: 2rem;
+            text-align: left;
+        }
+
+        #editModal h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        #editModal label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        #editModal input, #editModal select {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-light);
+        }
+
+        #editModal button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        #editModal button[type="submit"] {
+            background: var(--accent-color);
+            color: var(--text-dark);
+            margin-right: 1rem;
+        }
+
+        #editModal button[type="button"] {
+            background: #7f8c8d;
+            color: #fff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .custom-sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 2rem;
+            }
+            .card-border {
+                padding: 1rem;
+            }
+            .title-with-icon {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .create-account-wrapper {
+                margin-top: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .custom-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: none;
+                padding-bottom: 0;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/super_admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/super_admin_user_management" class="active"><i class="bi bi-people-fill"></i> User Management</a>
+        <a href="/super_admin_copus"><i class="bi bi-book"></i> Copus</a>
+        <a href="/super_admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+        <a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+        <a href="/super_admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+        <a href="/super_admin_setting"><i class="bi bi-gear-fill"></i>Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <div class="card-border" id="userManagementView">
+            <div class="section-title title-with-icon">
+                <span>USER MANAGEMENT</span>
+                <div class="create-account-wrapper" title="Create Account">
+                    <i class="bi bi-plus-circle create-account-icon"></i>
+                </div>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, email, role...">
+            </div>
+
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>ID #</th>
+                            <th>Last Name</th>
+                            <th>First Name</th>
+                            <th>Role</th>
+                            <th>PHINMA E-mail</th>
+                            <th>Password</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% employees.forEach((emp, index) => { %>
+                            <tr>
+                                <td><%= emp.employeeId || index + 1 %></td>
+                                <td><%= emp.lastname %></td>
+                                <td><%= emp.firstname %></td>
+                                <td><%= emp.role %></td>
+                                <td><%= emp.email %></td>
+                                <td><%= emp.password %></td>
+                                <td><%= emp.department %></td>
+                                <td>
+                                    <button
+                                        class="toggle-status-btn <%= emp.status === 'Active' ? 'status-active' : 'status-inactive' %>"
+                                        data-id="<%= emp.employeeId %>"
+                                        data-status="<%= emp.status %>">
+                                        <%= emp.status %>
+                                    </button>
+                                </td>
+                                <td>
+                                    <span
+                                        class="action-edit"
+                                        data-id="<%= emp.employeeId %>"
+                                        data-firstname="<%= emp.firstname %>"
+                                        data-lastname="<%= emp.lastname %>"
+                                        data-email="<%= emp.email %>"
+                                        data-role="<%= emp.role %>"
+                                        data-department="<%= emp.department %>"
+                                    >Edit</span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-3" id="paginationControls">
+                        <li class="page-item disabled" id="previousBtn">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item" id="nextBtn">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="check-animation">
+                <img src="/images/success.gif" alt="Success Animation" class="success-gif">
+            </div>
+            <h2>Success!</h2>
+            <p>User added successfully!</p>
+            <button class="btn btn-primary" onclick="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+    
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Edit Employee</h3>
+            <form id="editEmployeeForm" method="POST" action="/update_user">
+                <input type="hidden" name="employeeId" id="edit-employeeId">
+                <label>First Name:</label>
+                <input type="text" name="firstname" id="edit-firstname" required>
+                <label>Last Name:</label>
+                <input type="text" name="lastname" id="edit-lastname" required>
+                <label>Email:</label>
+                <input type="email" name="email" id="edit-email" required>
+                <label>Role:</label>
+                <input type="text" name="role" id="edit-role" required>
+                <label>Department:</label>
+                <select name="department" id="edit-department" required>
+                    <option value="">Select Department</option>
+                    <option value="CIT DEPARTMENT">CIT DEPARTMENT</option>
+                </select>
+                <br><br>
+                <button type="submit">Save Changes</button>
+                <button type="button" onclick="closeEditModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addUserModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="palamig section-title">
+                <span>ADD USER</span>
+            </div>
+            <div class="buga">
+                <form id="addUserForm" action="/add_employee" method="post" class="add-user-form">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="addDepartment" class="form-label">Department<span class="rar">*</span></label>
+                            <select class="form-select" id="addDepartment" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="CIT DEPARTMENT">CIT Department</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="lastname" class="form-label">Lastname<span class="rar">*</span></label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="firstname" class="form-label">Firstname<span class="rar">*</span></label>
+                            <input type="text" class="form-control" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="role" class="form-label">Role<span class="rar">*</span></label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="Faculty">CIT Teacher</option>
+                                <option value="Observer (ALC)">Observer(ALC)</option>
+                                <option value="Observer (SLC)">Observer(SLC)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">PHINMA Email<span class="rar">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    // Toggle User Status
+    document.querySelectorAll('.toggle-status-btn').forEach(button => {
+        button.addEventListener('click', async () => {
+            const employeeId = button.getAttribute('data-id');
+            const currentStatus = button.getAttribute('data-status');
+            const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+
+            try {
+                const response = await fetch('/update_user_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ employeeId, status: newStatus })
+                });
+
+                if (response.ok) {
+                    button.textContent = newStatus;
+                    button.setAttribute('data-status', newStatus);
+                    button.classList.toggle('status-active');
+                    button.classList.toggle('status-inactive');
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+
+    // Open/Close Modals
+    const userManagementView = document.getElementById('userManagementView');
+    const addUserModal = document.getElementById('addUserModal');
+    const editModal = document.getElementById('editModal');
+    const successModal = document.getElementById('successModal');
+    const createAccountWrapper = document.querySelector('.create-account-wrapper');
+
+    createAccountWrapper.addEventListener('click', () => {
+        userManagementView.style.display = 'none';
+        addUserModal.style.display = 'flex'; // Use flex to center the modal content
+    });
+
+    function closeAddUserModal() {
+        addUserModal.style.display = 'none';
+        userManagementView.style.display = 'block';
+    }
+
+    function closeSuccessModal() {
+        successModal.style.display = 'none';
+        window.location.reload(); // Reload the page to show updated table
+    }
+
+    function closeEditModal() {
+        editModal.style.display = 'none';
+    }
+
+    // Open Edit Modal and populate fields
+    document.querySelectorAll('.action-edit').forEach(editBtn => {
+        editBtn.addEventListener('click', () => {
+            document.getElementById('edit-employeeId').value = editBtn.dataset.id;
+            document.getElementById('edit-firstname').value = editBtn.dataset.firstname;
+            document.getElementById('edit-lastname').value = editBtn.dataset.lastname;
+            document.getElementById('edit-email').value = editBtn.dataset.email;
+            document.getElementById('edit-role').value = editBtn.dataset.role;
+            document.getElementById('edit-department').value = editBtn.dataset.department;
+
+            editModal.style.display = 'flex';
+        });
+    });
+</script>
+
+<script src="/js/Admin/user_management.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</html>

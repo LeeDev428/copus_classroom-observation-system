@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>COPUS 1 Observation Result</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f9;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #1a3c6b;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background: linear-gradient(to right, #1a3c6b, #f4f6f9, #1a3c6b);
+      margin: 20px 0;
+    }
+
+    .result-section {
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      transition: transform 0.2s ease;
+    }
+
+    .result-section:hover {
+      transform: translateY(-2px);
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #245185;
+      font-size: 20px;
+      border-left: 5px solid #4b90e2;
+      padding-left: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f2f5;
+      font-weight: 600;
+    }
+
+    .percentage {
+      font-weight: 600;
+      color: #28a745;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .chart-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+      text-align: center;
+    }
+
+    .chart-container h4 {
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #1f3d6b;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      background-color: #245185;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      transition: background 0.3s ease;
+    }
+
+    a:hover {
+      background-color: #1b3456;
+    }
+
+ /* Add this to your existing CSS file, or inside <style> tags */
+
+.schedule-details-grid {
+    display: grid;
+    /* This creates two columns that are roughly equal in width.
+       You can adjust '1fr' to control relative widths if needed. */
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; /* Space between the columns */
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.schedule-details-grid p {
+    margin: 5px 0;
+    font-size: 15px;
+    line-height: 1.5; /* Improve readability */
+}
+
+.schedule-details-grid p strong {
+    color: #1a3c6b;
+    display: inline-block; /* Allows for consistent alignment */
+    width: 120px; /* Adjust as needed for alignment of colons */
+    text-align: right; /* Aligns the strong text to the right */
+    padding-right: 10px; /* Space between strong text and value */
+}
+
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>COPUS 1 Observation Result</h2>
+    <hr>
+
+   <div class="schedule-details-grid">
+    <% if (scheduleDetails) { %>
+        <div>
+            <p><strong>Name:</strong> <%= scheduleDetails.firstname %> <%= scheduleDetails.lastname %></p>
+            <p><strong>Department:</strong> <%= scheduleDetails.department %></p>
+            <p><strong>Date:</strong> <%= new Date(scheduleDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+            <p><strong>Start Time:</strong> <%= scheduleDetails.start_time %></p>
+            <p><strong>End Time:</strong> <%= scheduleDetails.end_time %></p>
+            <p><strong>Year Level:</strong> <%= scheduleDetails.year_level %></p>
+        </div>
+        <div>
+            <p><strong>Semester:</strong> <%= scheduleDetails.semester %></p>
+            <p><strong>Subject Code:</strong> <%= scheduleDetails.subject_code %></p>
+            <p><strong>Subject Name:</strong> <%= scheduleDetails.subject %></p>
+            <p><strong>Observer:</strong> <%= scheduleDetails.observer %></p>
+            <p><strong>Copus:</strong> <%= scheduleDetails.copus %></p>
+            <p><strong>Mode:</strong> <%= scheduleDetails.modality %></p>
+        </div>
+    <% } else { %>
+        <p style="grid-column: 1 / -1; text-align: center;">Schedule details not available.</p>
+    <% } %>
+</div>
+<hr>
+
+    <div class="grid-container">
+      <div class="result-section">
+        <h3>Student Actions Tally</h3>
+        <table>
+          <% for (const action in tallies.studentActions) { %>
+            <tr>
+              <td><strong><%= action %>:</strong></td>
+              <td><%= tallies.studentActions[action] %></td>
+            </tr>
+          <% } %>
+        </table>
+      </div>
+
+      <div class="result-section">
+        <h3>Teacher Actions Tally</h3>
+        <table>
+          <% for (const action in tallies.teacherActions) { %>
+            <tr>
+              <td><strong><%= action %>:</strong></td>
+              <td><%= tallies.teacherActions[action] %></td>
+            </tr>
+          <% } %>
+        </table>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <h3>Level of Engagement</h3>
+      <table>
+        <tr>
+          <td><strong>High:</strong></td>
+          <td class="percentage"><%= engagementPercentages.High.toFixed(2) %>%</td>
+        </tr>
+        <tr>
+          <td><strong>Medium:</strong></td>
+          <td class="percentage"><%= engagementPercentages.Med.toFixed(2) %>%</td>
+        </tr>
+        <tr>
+          <td><strong>Low:</strong></td>
+          <td class="percentage"><%= engagementPercentages.Low.toFixed(2) %>%</td>
+        </tr>
+      </table>
+    </div>
+
+    <p><strong>Total Observation Intervals:</strong> <%= tallies.totalIntervals %></p>
+
+    <div class="grid-container">
+      <div class="chart-container">
+        <h4>Student Activity</h4>
+        <canvas id="studentPieChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h4>Teacher Activity</h4>
+        <canvas id="teacherPieChart"></canvas>
+      </div>
+    </div>
+
+    <a href="/Observer_dashboard">← Back to Dashboard</a>
+    <div style="text-align: center; margin-top: 30px;">
+  <button id="export-csv" style="margin-right: 10px;">Export as CSV</button>
+  <button id="export-pdf">Export as PDF</button>
+  <button id="export-excel" style="margin-left: 10px;">Export to Excel</button>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+  </div>
+
+  <script>
+    const tallies = <%- JSON.stringify(tallies) %>;
+    const engagementPercentages = <%- JSON.stringify(engagementPercentages) %>;
+
+    const createPieChart = (ctx, labels, data, colors, title) => {
+  return new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderColor: '#f4f6f9', // subtle border for visual pop
+        borderWidth: 3,
+        hoverBorderColor: '#1a3c6b',
+        hoverBorderWidth: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: title,
+          font: {
+            size: 20,
+            family: 'Inter',
+            weight: 'bold',
+          },
+          color: '#1a3c6b',
+          padding: {
+            top: 10,
+            bottom: 20
+          }
+        },
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#333',
+            font: {
+              size: 14,
+              weight: '500'
+            },
+            padding: 16
+          }
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#1a3c6b',
+          bodyColor: '#333',
+          borderColor: '#ccc',
+          borderWidth: 1,
+          callbacks: {
+            label: function (context) {
+              const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+              const value = context.raw;
+              const percent = ((value / total) * 100).toFixed(1);
+              return `${context.label}: ${value} (${percent}%)`;
+            }
+          }
+        },
+        datalabels: {
+          formatter: (value, ctx) => {
+            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+            const percent = ((value / total) * 100).toFixed(1);
+            return percent + '%';
+          },
+          color: '#fff',
+          font: {
+            weight: 'bold',
+            size: 14
+          },
+          textAlign: 'center',
+          textShadowBlur: 6,
+          textShadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+};
+
+
+    const studentCtx = document.getElementById('studentPieChart').getContext('2d');
+    const teacherCtx = document.getElementById('teacherPieChart').getContext('2d');
+
+    createPieChart(
+      studentCtx,
+      Object.keys(tallies.studentActions),
+      Object.values(tallies.studentActions),
+      ['#36a2eb', '#4bc0c0', '#ffcd56', '#ff6384', '#9966ff', '#ff9f40', '#e74c3c', '#3498db', '#1abc9c', '#9b59b6'],
+      'Student Activity Breakdown'
+    );
+
+    createPieChart(
+      teacherCtx,
+      Object.keys(tallies.teacherActions),
+      Object.values(tallies.teacherActions),
+      ['#ff9f40', '#36a2eb', '#9966ff', '#ffcd56', '#cfcfcf', '#90ee90', '#ffa07a', '#add8e6', '#dcb3e3', '#fa8072'],
+      'Teacher Activity Breakdown'
+    );
+
+    document.getElementById('export-csv').addEventListener('click', () => {
+    let rows = [
+      ['Category', 'Action', 'Count'],
+      ...Object.entries(tallies.studentActions).map(([k, v]) => ['Student', k, v]),
+      ...Object.entries(tallies.teacherActions).map(([k, v]) => ['Teacher', k, v]),
+      ['', '', ''],
+      ['Engagement Level', 'Percentage'],
+      ['High', engagementPercentages.High.toFixed(2) + '%'],
+      ['Medium', engagementPercentages.Med.toFixed(2) + '%'],
+      ['Low', engagementPercentages.Low.toFixed(2) + '%'],
+      ['', 'Total Intervals', tallies.totalIntervals]
+    ];
+
+    let csvContent = rows.map(r => r.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'COPUS_Observation_Result.csv';
+    link.click();
+  });
+
+  document.getElementById('export-pdf').addEventListener('click', async () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 10;
+
+    doc.setFontSize(16);
+    doc.text('COPUS 1 Observation Result', 105, y, null, null, 'center');
+    y += 10;
+
+    const addTable = (title, data) => {
+      doc.setFontSize(12);
+      doc.text(title, 14, y += 10);
+      data.forEach(([key, val]) => {
+        doc.text(`${key}: ${val}`, 20, y += 8);
+      });
+    };
+
+    addTable('Student Actions', Object.entries(tallies.studentActions));
+    addTable('Teacher Actions', Object.entries(tallies.teacherActions));
+
+    y += 10;
+    doc.setFontSize(12);
+    doc.text('Engagement Levels', 14, y += 8);
+    doc.text(`High: ${engagementPercentages.High.toFixed(2)}%`, 20, y += 8);
+    doc.text(`Medium: ${engagementPercentages.Med.toFixed(2)}%`, 20, y += 8);
+    doc.text(`Low: ${engagementPercentages.Low.toFixed(2)}%`, 20, y += 8);
+
+    doc.text(`Total Intervals: ${tallies.totalIntervals}`, 14, y += 12);
+
+    // Add charts as images
+    const studentChart = document.getElementById('studentPieChart');
+    const teacherChart = document.getElementById('teacherPieChart');
+
+    const studentImg = studentChart.toDataURL('image/png', 1.0);
+    const teacherImg = teacherChart.toDataURL('image/png', 1.0);
+
+    // Add Student Chart
+    doc.setFontSize(12);
+    doc.text('Student Activity Chart:', 14, y += 12);
+    doc.addImage(studentImg, 'PNG', 20, y += 4, 160, 90);
+    y += 95;
+
+    // Add Teacher Chart
+    doc.text('Teacher Activity Chart:', 14, y += 10);
+    doc.addImage(teacherImg, 'PNG', 20, y += 4, 160, 90);
+
+    doc.save('COPUS_Observation_Result.pdf');
+  });
+
+   document.getElementById('export-excel').addEventListener('click', () => {
+    const studentData = Object.entries(tallies.studentActions).map(([k, v]) => ({
+      Category: 'Student',
+      Action: k,
+      Count: v
+    }));
+
+    const teacherData = Object.entries(tallies.teacherActions).map(([k, v]) => ({
+      Category: 'Teacher',
+      Action: k,
+      Count: v
+    }));
+
+    const engagementData = [
+      { Level: 'High', Percentage: engagementPercentages.High.toFixed(2) + '%' },
+      { Level: 'Medium', Percentage: engagementPercentages.Med.toFixed(2) + '%' },
+      { Level: 'Low', Percentage: engagementPercentages.Low.toFixed(2) + '%' },
+    ];
+
+    const totalIntervals = [
+      { Info: 'Total Intervals', Value: tallies.totalIntervals }
+    ];
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const allData = [...studentData, {}, ...teacherData];
+    const actionSheet = XLSX.utils.json_to_sheet(allData);
+    const engagementSheet = XLSX.utils.json_to_sheet(engagementData);
+    const totalSheet = XLSX.utils.json_to_sheet(totalIntervals);
+
+    XLSX.utils.book_append_sheet(wb, actionSheet, 'Actions');
+    XLSX.utils.book_append_sheet(wb, engagementSheet, 'Engagement');
+    XLSX.utils.book_append_sheet(wb, totalSheet, 'Summary');
+
+    XLSX.writeFile(wb, 'COPUS_Observation_Result.xlsx');
+  });
+  </script>
+</body>
+</html>

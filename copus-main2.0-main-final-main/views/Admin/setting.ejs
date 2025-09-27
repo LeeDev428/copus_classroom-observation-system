@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Setting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<style>
+  /* --- Root Variables --- */
+:root {
+  --primary-color-start: #0f2027; /* Dark blue */
+  --primary-color-end: #203a43; /* Darker blue */
+  --secondary-color-start: #2c5364; /* Blue-green */
+  --secondary-color-end: #203a43; /* Darker blue */
+  --text-light: #e0e0e0;
+  --text-dark: #333;
+  --sidebar-width: 280px;
+  --accent-color: #17e891; /* A vibrant green for accents */
+  --danger-color: #e74c3c; /* Red for logout/cancel */
+  --card-bg-transparent: rgba(255, 255, 255, 0.05);
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Base Styles --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: var(--text-light);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container-fluid {
+  padding: 0;
+}
+
+.row {
+  margin: 0;
+}
+
+/* --- Sidebar --- */
+.custom-sidebar {
+  width: var(--sidebar-width);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+ background: linear-gradient(to bottom, #11405b, #0f2027);
+  color: var(--text-light);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.custom-sidebar h6 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.custom-sidebar small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-sidebar hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem 0;
+}
+
+.custom-sidebar a {
+  color: var(--text-light);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.custom-sidebar a i {
+  font-size: 1.25rem;
+}
+
+.custom-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.custom-sidebar a.active {
+  background: linear-gradient(to right, #2c5364, #203a43);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.logout-btn {
+  background: linear-gradient(to right, #e74c3c, #c0392b);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Main Content --- */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2rem;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+/* --- Profile Header --- */
+.profile-header {
+  background: linear-gradient(45deg, #2c5364, #203a43);
+  padding: 1.5rem 2rem;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+}
+
+.profile-info img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  margin-right: 1.5rem;
+}
+
+.profile-info .name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #fff;
+}
+
+.lock-icon {
+  font-size: 2rem;
+  color: #fff;
+}
+
+/* --- Form Sections --- */
+.form-section {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-section hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 1rem 0 2rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-light);
+  transition: all 0.3s;
+}
+
+.form-group input::placeholder {
+  color: rgba(224, 224, 224, 0.5);
+}
+
+.form-group input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.25rem rgba(23, 232, 145, 0.25);
+}
+
+.primary-btn {
+  background: linear-gradient(to right, #17e891, #17c87c);
+  border: none;
+  color: var(--text-dark);
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+}
+
+/* --- Password Section --- */
+.password-form .form-content {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.password-form .form-fields {
+  flex: 1;
+}
+
+.password-form .fof {
+  margin-bottom: 1rem;
+}
+
+.password-form .help-img {
+  width: 250px;
+  height: auto;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.password-form .help-img img {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .custom-sidebar {
+    transform: translateX(-100%);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .form-group {
+    flex: 1 1 100%;
+  }
+  .password-form .form-content {
+    flex-direction: column;
+  }
+  .password-form .help-img {
+    width: 100%;
+    height: 150px;
+  }
+  .main-content {
+    padding-top: 2rem;
+  }
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .profile-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  .profile-info img {
+    margin: 0 0 1rem;
+  }
+}
+</style>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+       <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/admin_dashboard" ><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/admin_user_management" ><i class="bi bi-people-fill"></i> User Management</a>
+<a href="admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+<a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+<a href="/admin_copus_history"   ><i class="bi bi-clock-history"></i> Copus History</a>
+<a href="/admin_setting" class="active"><i class="bi bi-gear-fill"></i> Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form> 
+      </div>   
+
+      <!-- Main content -->
+      <div class="main-content">
+        <h5 class="section-title">ACCOUNT SETTINGS</h5>
+    
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <div class="profile-info">
+            <img src="/images/data-analytics-role.jpg" alt="Profile">
+            <div>
+              <h6 class="name"><%= firstName %> <%= lastName %></h6>
+            </div>
+          </div>
+          <span class="lock-icon">&#128274;</span>
+        </div>
+    
+        <!-- Profile Info -->
+         <!-- Profile Info -->
+<div class="form-section">
+  <h6 class="section-subtitle">PROFILE INFORMATION</h6>
+  <hr>
+  <form>
+    <!-- Row 1 -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>FIRST NAME *</label>
+        <input type="text" placeholder="First Name">
+      </div>
+      <div class="form-group">
+        <label>LAST NAME *</label>
+        <input type="text" placeholder="Last Name">
+      </div>
+      <div class="form-group">
+        <label>MIDDLE INITIAL</label>
+        <input type="text" placeholder="Middle Initial">
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>PHINMA EMAIL *</label>
+        <input type="email" placeholder="PHINMA Email">
+      </div>
+      <div class="form-group">
+        <label>DEPARTMENT *</label>
+        <input type="text" placeholder="Department">
+      </div>
+      <div class="form-group">
+        <label>DEAN *</label>
+        <input type="text" placeholder="Dean">
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>ASSIGNED PROGRAM HEAD (IF APPLICABLE)</label>
+        <input type="text" placeholder="Assigned Program Head">
+      </div>
+      <div class="form-group">
+        <label>YEARS OF TEACHING EXPERIENCE IN PHINMA ED *</label>
+        <input type="text" placeholder="Years of Teaching">
+      </div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>YEAR HIRED *</label>
+        <input type="text" placeholder="Year Hired">
+      </div>
+      <div class="form-group">
+        <label>YEAR REGULARIZED *</label>
+        <input type="text" placeholder="Year Regularized">
+      </div>
+      <div class="form-group">
+        <label>HIGHEST EDUCATIONAL ATTAINMENT *</label>
+        <input type="text" placeholder="Educational Attainment">
+      </div>
+    </div>
+
+    <!-- Row 5 -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>PROFESSIONAL LICENSE *</label>
+        <input type="text" placeholder="Professional License">
+      </div>
+      <div class="form-group">
+        <label>EMPLOYMENT STATUS *</label>
+        <input type="text" placeholder="Employment Status">
+      </div>
+      <div class="form-group">
+        <label>RANK *</label>
+        <input type="text" placeholder="Rank">
+      </div>
+    </div>
+
+    <button class="primary-btn">UPDATE INFORMATION</button>
+  </form>
+</div>
+    
+        <!-- Password Section -->
+        <div class="form-section">
+          <h6 class="section-subtitle">PASSWORD</h6>
+          <hr>
+          <form class="password-form">
+            <div class="form-content">
+              <!-- Left Column: Inputs -->
+              <div class="form-fields">
+                <div class="fof">
+                  <label>CURRENT PASSWORD *</label>
+                  <input type="password" placeholder="Current Password">
+                </div>
+                <div class="fof">
+                  <label>NEW PASSWORD *</label>
+                  <input type="password" placeholder="New Password">
+                </div>
+                <div class="fof">
+                  <label>RE-TYPE NEW PASSWORD *</label>
+                  <input type="password" placeholder="Confirm New Password">
+                </div>
+              </div>
+        
+              <!-- Right Column: Help Image -->
+              <div class="help-img">
+                <img src="https://cdn-icons-png.flaticon.com/512/3106/3106921.png" alt="Password Help">
+              </div>
+            </div>
+        
+            <button class="primary-btn">UPDATE PASSWORD</button>
+          </form>
+        </div>
+        
+      </div>
+      
+  </div>
+  <script src="/js/Admin/setting.js"></script>
+</body>
+</html>

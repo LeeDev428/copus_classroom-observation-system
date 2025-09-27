@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>COPUS System - PHINMA</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts - Inter & Lora -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <style>
+        /* Variables and General Styling */
+        :root {
+            --primary-color: #00e699; /* Bright Green */
+            --secondary-color: #fff; /* White */
+            --dark-blue: #0a192f; /* Very Dark Blue */
+            --light-blue: #2c3e50;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--dark-blue), var(--light-blue));
+            color: var(--secondary-color);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Lora', serif;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--primary-color);
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        section {
+            padding: 80px 0;
+            position: relative;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(10, 25, 47, 0.8);
+            backdrop-filter: blur(10px);
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--primary-color) !important;
+        }
+
+        .navbar-toggler {
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .navbar-toggler-icon {
+            filter: brightness(0) invert(1);
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--secondary-color) !important;
+            font-weight: 600;
+            margin: 0 12px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            width: 80%;
+            left: 10%;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+
+        .custom-outline-darkblue {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 30px;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .custom-outline-darkblue:hover {
+            background-color: var(--primary-color);
+            color: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 230, 153, 0.3);
+        }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: rgba(10, 25, 47, 0.9);
+                backdrop-filter: blur(10px);
+                border-radius: 10px;
+                padding: 10px 20px;
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            .navbar-nav .nav-item {
+                margin: 10px 0;
+            }
+        }
+
+        /* Home Section */
+        .home-section {
+            background: linear-gradient(135deg, var(--dark-blue), var(--light-blue));
+            padding: 100px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .home-section .text-content {
+            flex: 1 1 45%;
+            text-align: left;
+            padding-right: 30px;
+        }
+
+        .home-section h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .home-section p {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+
+        .home-section .btn-outline-primary {
+            font-size: 16px;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            transition: all 0.3s ease-in-out;
+            font-weight: 600;
+        }
+
+        .home-section .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: var(--dark-blue);
+            transform: scale(1.05);
+        }
+
+        .home-section .image-content {
+            flex: 1 1 45%;
+            text-align: center;
+        }
+
+        .home-section img.corner-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.4s ease;
+        }
+
+        .home-section img.corner-image:hover {
+            transform: scale(1.03);
+        }
+        
+        /* About Section */
+        .about-section {
+            background-color: var(--dark-blue);
+            padding: 80px 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .about-section h2 {
+            margin-bottom: 10px;
+        }
+
+        .about-section .text-box {
+            flex: 1 1 45%;
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 30px;
+            font-size: 18px;
+            line-height: 1.7;
+            box-shadow: var(--box-shadow);
+        }
+
+        .about-section .image-content {
+            flex: 1 1 45%;
+            text-align: center;
+        }
+
+        .about-section img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .about-section img:hover {
+            transform: scale(1.03);
+        }
+
+        /* Teaching + FAQ */
+        .teaching-section,
+        .faq-section {
+            background: linear-gradient(90deg, #ffffff, #0a192f);
+            color: var(--dark-blue);
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .teaching-section h3, .faq-section h3 {
+            color: var(--dark-blue);
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+
+        .teaching-section p, .faq-section p {
+            color: var(--dark-blue);
+           
+        }
+
+        .btn-outline-light {
+            color: var(--dark-blue);
+            border-color: var(--dark-blue);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            color: var(#ffffff) !important;
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        /* Features */
+        .features-section {
+            background-color: var(--dark-blue);
+            padding: 80px 40px;
+        }
+
+        .features-section h2 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .features-section p {
+            font-size: 18px;
+            margin-bottom: 50px;
+        }
+
+        .feature-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            height: 100%;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-box i {
+            font-size: 50px;
+            margin-bottom: 20px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+            color: var(--primary-color) !important;
+        }
+
+        .feature-box:hover i {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .feature-box h5 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        .feature-box p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background-color: var(--light-blue);
+            padding: 80px 40px;
+        }
+
+        .contact-section h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .contact-section p {
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .contact-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-box:hover {
+            transform: translateY(-4px);
+        }
+
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .contact-box h5 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .contact-section input,
+        .contact-section textarea {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            color: var(--secondary-color);
+            transition: border 0.3s ease;
+        }
+
+        .contact-section input:focus,
+        .contact-section textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 230, 153, 0.2);
+        }
+
+        .contact-section input::placeholder,
+        .contact-section textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .contact-section form .btn {
+            border-radius: 25px;
+            font-weight: 600;
+            padding: 10px 25px;
+            background-color: var(--primary-color);
+            color: var(--dark-blue);
+            transition: background 0.3s ease;
+        }
+
+        .contact-section form .btn:hover {
+            background-color: #00b377;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-blue);
+            color: var(--secondary-color);
+            padding: 60px 40px 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 5px rgba(0, 230, 153, 0.5);
+        }
+
+        .footer-socials a {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .footer-socials a:hover {
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        hr.bg-light {
+            opacity: 0.2;
+        }
+
+        @media (max-width: 768px) {
+            .footer-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container d-flex justify-content-between align-items-center">
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold fs-4" href="#">
+            COPUS
+        </a>
+        
+        <!-- Toggle for mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Centered Nav Links -->
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item mx-3"><a class="nav-link active" href="#home">Home</a></li>
+                <li class="nav-item mx-3"><a class="nav-link" href="#about">About</a></li>
+                <li class="nav-item mx-3"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item mx-3"><a class="nav-link" href="#contact">Contact</a></li>
+            </ul>
+        </div>
+        
+        <div class="d-flex align-items-center position-relative">
+            <a href="/login" class="btn custom-outline-darkblue">Login</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Home -->
+<section id="home" class="home-section">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center">
+        <div class="text-content text-start" data-aos="fade-right">
+            <h1>Empowering CIT Teachers with Data-Driven Insights</h1>
+            <p>Classroom Observation Protocol for Undergraduate STEM (COPUS) System at PHINMA-Araullo University South Campus CIT Department</p>
+            <a href="#about" class="btn btn-outline-primary">Learn more</a>
+        </div>
+        <div class="image-content" data-aos="fade-left">
+          <img src="/images/HOMEPAGE PICTURE.png" alt="Data analytics" class="corner-image"/>
+        </div>
+    </div>
+</section>
+
+<!-- About -->
+<section id="about" class="about-section">
+    <div class="container text-center mb-4" data-aos="fade-down">
+        <h2 class="fw-bold">About</h2>
+        <p>Revolutionizing Classroom Observation with Data-Driven Insights</p>
+    </div>
+    <div class="container d-flex flex-wrap justify-content-between align-items-start">
+        <div class="image-content" style="flex: 1 1 45%;" data-aos="zoom-in-right">
+            <img src="https://placehold.co/500x300/1a2a40/00e699?text=About+Us" alt="Analytics" class="img-fluid rounded" />
+        </div>
+        <div class="text-box" style="flex: 1 1 45%;" data-aos="zoom-in-left">
+            <p>
+                Our Classroom Observation Protocol for Undergraduate STEM (COPUS) System is designed to enhance the teaching and learning experience by providing a robust framework for real-time data collection and analysis. This system empowers educators with actionable insights into classroom dynamics, promoting continuous improvement in teaching methodologies and student engagement.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Teaching -->
+<section class="teaching-section py-5 text-center">
+    <div class="container" data-aos="fade-up">
+        <h3>Thinking about Teaching?</h3>
+        <p>Teaching is more than just delivering lessons—it's about inspiring and shaping future generations. Our system provides the tools to help you succeed.</p>
+        <a href="#features" class="btn btn-outline-light mt-3">Learn more</a>
+    </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="features-section py-5 text-center">
+    <div class="container">
+        <h2>Features</h2>
+        <p class="mb-5">Cutting-Edge Features for Seamless Classroom Observations</p>
+        <div class="row g-4">
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    <h5 class="fw-bold mt-3">Real-Time Data Collection</h5>
+                    <p>Classroom observations are recorded instantly using web and mobile platforms, improving efficiency.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <h5 class="fw-bold mt-3">Advanced Analytics</h5>
+                    <p>Gain insights with real-time charts, trends, and performance metrics.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    <h5 class="fw-bold mt-3">Immediate Feedback</h5>
+                    <p>Teachers receive real-time observation results, allowing for quick adjustments in teaching.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-phone-fill"></i>
+                    <h5 class="fw-bold mt-3">Mobile Compatibility</h5>
+                    <p>Conduct observations on the go with a fully responsive and mobile-friendly design.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <h5 class="fw-bold mt-3">Secure User Management</h5>
+                    <p>Ensure data privacy and security with role-based authentication controls.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="600">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                    <h5 class="fw-bold mt-3">Automated Report Generation</h5>
+                    <p>Generate comprehensive reports effortlessly, reducing manual workload and improving efficiency.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-envelope-fill"></i>
+                    <h5 class="fw-bold mt-3">Email Notifications</h5>
+                    <p>Receive important updates directly to your inbox, ensuring you never miss an alert or schedule.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="800">
+                <div class="feature-box text-center h-100 p-4">
+                    <i class="bi bi-gear-fill"></i>
+                    <h5 class="fw-bold mt-3">Help & Support</h5>
+                    <p>Get assistance anytime with our comprehensive guides, FAQs, and support team.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section text-center py-5">
+    <div class="container" data-aos="fade-up">
+        <h3 class="fw-bold">Frequently Asked Questions</h3>
+        <p>Got questions? We’ve got answers! Explore our frequently asked questions to learn more...</p>
+        <a href="#" class="btn btn-outline-light mt-3">Learn more</a>
+    </div>
+</section>
+
+<!-- Contact -->
+<section id="contact" class="contact-section py-5">
+    <div class="container">
+        <h3 class="text-center mb-4 fw-bold" data-aos="fade-down">Contact Us</h3>
+        <p class="text-center mb-4" data-aos="fade-down">Get In Touch With Us</p>
+        <div class="row g-4">
+            <div class="col-md-6" data-aos="zoom-in-right">
+                <div class="contact-box rounded p-4 h-100">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="icon-circle me-3">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Location:</h5>
+                            <p class="mb-0">Cabanatuan City, Nueva Ecija 3100</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="icon-circle me-3">
+                            <i class="bi bi-envelope-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Email:</h5>
+                            <p class="mb-0">jeraldespares123@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <div class="icon-circle me-3">
+                            <i class="bi bi-telephone-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Call:</h5>
+                            <p class="mb-0">+63 012345678910</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Box -->
+            <div class="col-md-6" data-aos="zoom-in-left">
+                <div class="contact-box text-center rounded p-4 h-100">
+                    <form method="POST" action="/contact">
+                        <input type="text" name="fullname" class="form-control mb-3" placeholder="Fullname" required />
+                        <div class="row mb-3">
+                            <div class="col">
+                                <input type="number" name="phone" class="form-control" placeholder="Phone" required />
+                            </div>
+                            <div class="col">
+                                <input type="email" name="email" class="form-control" placeholder="Email" required />
+                            </div>
+                        </div>
+                        <textarea name="message" class="form-control mb-3" placeholder="Message" rows="4" required></textarea>
+                        <button type="submit" class="btn btn-outline-primary w-30">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer text-white py-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-2 footer-top">
+            <div class="d-flex align-items-center">
+                <img src="https://placehold.co/50x50/1a2a40/00e699?text=Logo" alt="Logo" class="footer-logo me-3">
+                <p class="mb-0">
+                    A WEB AND MOBILE-BASED COPUS SYSTEM IN PHINMA-ARAULLO UNIVERSITY SOUTH CAMPUS - CIT DEPARTMENT
+                </p>
+            </div>
+            <div class="footer-socials">
+                <a href="#" class="social-icon facebook me-2"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="social-icon instagram me-2"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="social-icon twitter"><i class="bi bi-twitter"></i></a>
+            </div>
+        </div>
+        <hr class="bg-light">
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 1000,
+        easing: 'ease-in-out',
+        once: true
+    });
+</script>
+
+</body>
+</html>

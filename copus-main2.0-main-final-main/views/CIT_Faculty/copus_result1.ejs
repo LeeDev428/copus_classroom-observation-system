@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>COPUS 1 Observation Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        /* Your existing CSS styles */
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: #f4f6f9; color: #333; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 20px; }
+        h2 { color: #1a3c6b; text-align: center; margin-bottom: 10px; font-size: 28px; }
+        hr { border: 0; height: 1px; background: linear-gradient(to right, #1a3c6b, #f4f6f9, #1a3c6b); margin: 20px 0; }
+        .result-section { background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.07); border-radius: 12px; padding: 20px; margin-bottom: 30px; transition: transform 0.2s ease; }
+        .result-section:hover { transform: translateY(-2px); }
+        h3 { margin-top: 0; color: #245185; font-size: 20px; border-left: 5px solid #4b90e2; padding-left: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f0f2f5; font-weight: 600; }
+        .percentage { font-weight: 600; color: #28a745; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .chart-container { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.07); text-align: center; }
+        .chart-container h4 { margin-bottom: 15px; font-size: 18px; color: #1f3d6b; }
+        a { display: inline-block; margin-top: 20px; text-decoration: none; background-color: #245185; color: #fff; padding: 10px 20px; border-radius: 6px; transition: background 0.3s ease; }
+        a:hover { background-color: #1b3456; }
+        /* Styles for schedule details */
+        .schedule-details { background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.07); border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+        .schedule-details p { margin: 5px 0; font-size: 16px; }
+        .schedule-details p strong { color: #1a3c6b; }
+        .error-message { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>COPUS 1 Observation Result</h2>
+        <hr>
+
+        <% if (message) { %>
+            <div class="error-message">
+                <p><%= message %></p>
+            </div>
+        <% } %>
+
+        <div class="schedule-details">
+            <h3>Observation Details</h3>
+            <% if (scheduleDetails) { %>
+                <p><strong>Name:</strong> <%= scheduleDetails.firstname %> <%= scheduleDetails.lastname %></p>
+                <p><strong>Department:</strong> <%= scheduleDetails.department %></p>
+                <p><strong>Date:</strong> <%= new Date(scheduleDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                <p><strong>Start Time:</strong> <%= scheduleDetails.start_time %></p>
+                <p><strong>End Time:</strong> <%= scheduleDetails.end_time %></p>
+                <p><strong>Year Level:</strong> <%= scheduleDetails.year_level %></p>
+                <p><strong>Semester:</strong> <%= scheduleDetails.semester %></p>
+                <p><strong>Subject Code:</strong> <%= scheduleDetails.subject_code %></p>
+                <p><strong>Subject Name:</strong> <%= scheduleDetails.subject %></p>
+                <p><strong>Observer:</strong> <%= scheduleDetails.observer %></p>
+               <p><strong>Copus:</strong> <%= scheduleDetails.copus_type %></p>
+                <p><strong>Mode:</strong> <%= scheduleDetails.modality %></p>
+            <% } else { %>
+                <p>Schedule details not available.</p>
+            <% } %>
+        </div>
+        <hr>
+
+        <% if (tallies && engagementPercentages) { %>
+            <div class="grid-container">
+                <div class="result-section">
+                    <h3>Student Actions Tally</h3>
+                    <table>
+                        <% for (const action in tallies.studentActions) { %>
+                            <tr>
+                                <td><strong><%= action %>:</strong></td>
+                                <td><%= tallies.studentActions[action] %></td>
+                            </tr>
+                        <% } %>
+                    </table>
+                </div>
+
+                <div class="result-section">
+                    <h3>Teacher Actions Tally</h3>
+                    <table>
+                        <% for (const action in tallies.teacherActions) { %>
+                            <tr>
+                                <td><strong><%= action %>:</strong></td>
+                                <td><%= tallies.teacherActions[action] %></td>
+                            </tr>
+                        <% } %>
+                    </table>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h3>Level of Engagement</h3>
+                <table>
+                    <tr>
+                        <td><strong>High:</strong></td>
+                        <td class="percentage"><%= engagementPercentages.High.toFixed(2) %>%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medium:</strong></td>
+                        <td class="percentage"><%= engagementPercentages.Med.toFixed(2) %>%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Low:</strong></td>
+                        <td class="percentage"><%= engagementPercentages.Low.toFixed(2) %>%</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p><strong>Total Observation Intervals:</strong> <%= tallies.totalIntervals %></p>
+
+            <div class="grid-container">
+                <div class="chart-container">
+                    <h4>Student Activity</h4>
+                    <canvas id="studentPieChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h4>Teacher Activity</h4>
+                    <canvas id="teacherPieChart"></canvas>
+                </div>
+            </div>
+
+            <a href="/CIT_Faculty_copus_result">← Back to Observation List</a>
+            <div style="text-align: center; margin-top: 30px;">
+                <button id="export-csv" style="margin-right: 10px;">Export as CSV</button>
+                <button id="export-pdf">Export as PDF</button>
+                <button id="export-excel" style="margin-left: 10px;">Export to Excel</button>
+            </div>
+
+        <% } else { %>
+            <p style="text-align: center; font-style: italic;">No detailed observation data found for this schedule.</p>
+            <a href="/CIT_Faculty_copus_result">← Back to Observation List</a>
+        <% } %>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    </div>
+
+    <script>
+        // Only try to initialize charts if tallies and engagementPercentages are available
+        <% if (tallies && engagementPercentages) { %>
+            const tallies = <%- JSON.stringify(tallies) %>;
+            const engagementPercentages = <%- JSON.stringify(engagementPercentages) %>;
+
+            const createPieChart = (ctx, labels, data, colors, title) => {
+                return new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: colors,
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: { display: true, text: title, font: { size: 18 }, color: '#333' },
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const total = context.chart._metasets[0].total;
+                                        const value = context.raw;
+                                        const percent = ((value / total) * 100).toFixed(2);
+                                        return `${context.label}: ${value} (${percent}%)`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                formatter: (value, ctx) => {
+                                    const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                    return percentage;
+                                },
+                                color: '#fff', font: { weight: 'bold' }, textShadowBlur: 4, textShadowColor: 'rgba(0, 0, 0, 0.4)'
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            };
+
+            const studentCtx = document.getElementById('studentPieChart').getContext('2d');
+            const teacherCtx = document.getElementById('teacherPieChart').getContext('2d');
+
+            createPieChart(
+                studentCtx,
+                Object.keys(tallies.studentActions),
+                Object.values(tallies.studentActions),
+                ['#36a2eb', '#4bc0c0', '#ffcd56', '#ff6384', '#9966ff', '#ff9f40', '#e74c3c', '#3498db', '#1abc9c', '#9b59b6'],
+                'Student Activity Breakdown'
+            );
+
+            createPieChart(
+                teacherCtx,
+                Object.keys(tallies.teacherActions),
+                Object.values(tallies.teacherActions),
+                ['#ff9f40', '#36a2eb', '#9966ff', '#ffcd56', '#cfcfcf', '#90ee90', '#ffa07a', '#add8e6', '#dcb3e3', '#fa8072'],
+                'Teacher Activity Breakdown'
+            );
+
+            // --- Export CSV Logic (Include scheduleDetails, tallies, engagementPercentages) ---
+            document.getElementById('export-csv').addEventListener('click', () => {
+                let csvRows = [];
+                // Schedule Details
+                if (scheduleDetails) {
+                    csvRows.push(['Observation Details']);
+                    csvRows.push(['Name', `${scheduleDetails.firstname} ${scheduleDetails.lastname}`]);
+                    csvRows.push(['Department', scheduleDetails.department]);
+                    csvRows.push(['Date', new Date(scheduleDetails.date).toLocaleDateString('en-US')]);
+                    csvRows.push(['Start Time', scheduleDetails.start_time]);
+                    csvRows.push(['End Time', scheduleDetails.end_time]);
+                    csvRows.push(['Year Level', scheduleDetails.year_level]);
+                    csvRows.push(['Semester', scheduleDetails.semester]);
+                    csvRows.push(['Subject Code', scheduleDetails.subject_code]);
+                    csvRows.push(['Subject Name', scheduleDetails.subject]);
+                    csvRows.push(['Observer', scheduleDetails.observer]);
+                    csvRows.push(['Copus', scheduleDetails.copus]);
+                    csvRows.push(['Mode', scheduleDetails.modality]);
+                    csvRows.push(['', '']); // Empty row for separation
+                }
+
+                // Tallies
+                csvRows.push(['Student Actions']);
+                Object.entries(tallies.studentActions).forEach(([action, count]) => {
+                    csvRows.push([action, count]);
+                });
+                csvRows.push(['', '']);
+
+                csvRows.push(['Teacher Actions']);
+                Object.entries(tallies.teacherActions).forEach(([action, count]) => {
+                    csvRows.push([action, count]);
+                });
+                csvRows.push(['', '']);
+
+                // Engagement
+                csvRows.push(['Engagement Level']);
+                csvRows.push(['High', engagementPercentages.High.toFixed(2) + '%']);
+                csvRows.push(['Medium', engagementPercentages.Med.toFixed(2) + '%']);
+                csvRows.push(['Low', engagementPercentages.Low.toFixed(2) + '%']);
+                csvRows.push(['', '']);
+
+                csvRows.push(['Total Observation Intervals', tallies.totalIntervals]);
+
+                let csvContent = csvRows.map(e => e.join(',')).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'COPUS_Observation_Result.csv';
+                link.click();
+            });
+
+            // --- Export PDF Logic ---
+            document.getElementById('export-pdf').addEventListener('click', async () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                let y = 10;
+
+                doc.setFontSize(16);
+                doc.text('COPUS 1 Observation Result', 105, y, null, null, 'center');
+                y += 10;
+
+                // Add schedule details to PDF
+                if (typeof scheduleDetails !== 'undefined' && scheduleDetails) {
+                    doc.setFontSize(12);
+                    doc.text('Observation Details:', 14, y += 10);
+                    doc.text(`Name: ${scheduleDetails.firstname} ${scheduleDetails.lastname}`, 20, y += 8);
+                    doc.text(`Department: ${scheduleDetails.department}`, 20, y += 8);
+                    doc.text(`Date: ${new Date(scheduleDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, 20, y += 8);
+                    doc.text(`Start Time: ${scheduleDetails.start_time}`, 20, y += 8);
+                    doc.text(`End Time: ${scheduleDetails.end_time}`, 20, y += 8);
+                    doc.text(`Year Level: ${scheduleDetails.year_level}`, 20, y += 8);
+                    doc.text(`Semester: ${scheduleDetails.semester}`, 20, y += 8);
+                    doc.text(`Subject Code: ${scheduleDetails.subject_code}`, 20, y += 8);
+                    doc.text(`Subject Name: ${scheduleDetails.subject}`, 20, y += 8);
+                    doc.text(`Observer: ${scheduleDetails.observer}`, 20, y += 8);
+                    doc.text(`Copus: ${scheduleDetails.copus}`, 20, y += 8);
+                    doc.text(`Mode: ${scheduleDetails.modality}`, 20, y += 8);
+                    y += 10; // Add some space after details
+                }
+
+                const addTable = (title, data) => {
+                    doc.setFontSize(12);
+                    doc.text(title, 14, y += 10);
+                    data.forEach(([key, val]) => {
+                        doc.text(`${key}: ${val}`, 20, y += 8);
+                    });
+                };
+
+                addTable('Student Actions', Object.entries(tallies.studentActions));
+                addTable('Teacher Actions', Object.entries(tallies.teacherActions));
+
+                y += 10;
+                doc.setFontSize(12);
+                doc.text('Engagement Levels', 14, y += 8);
+                doc.text(`High: ${engagementPercentages.High.toFixed(2)}%`, 20, y += 8);
+                doc.text(`Medium: ${engagementPercentages.Med.toFixed(2)}%`, 20, y += 8);
+                doc.text(`Low: ${engagementPercentages.Low.toFixed(2)}%`, 20, y += 8);
+
+                doc.text(`Total Intervals: ${tallies.totalIntervals}`, 14, y += 12);
+
+                // Add charts as images
+                const studentChart = document.getElementById('studentPieChart');
+                const teacherChart = document.getElementById('teacherPieChart');
+
+                const studentImg = studentChart.toDataURL('image/png', 1.0);
+                const teacherImg = teacherChart.toDataURL('image/png', 1.0);
+
+                // Add Student Chart
+                doc.setFontSize(12);
+                doc.text('Student Activity Chart:', 14, y += 12);
+                doc.addImage(studentImg, 'PNG', 20, y += 4, 160, 90);
+                y += 95;
+
+                // Add Teacher Chart
+                doc.text('Teacher Activity Chart:', 14, y += 10);
+                doc.addImage(teacherImg, 'PNG', 20, y += 4, 160, 90);
+
+                doc.save('COPUS_Observation_Result.pdf');
+            });
+
+            // --- Export Excel Logic ---
+            document.getElementById('export-excel').addEventListener('click', () => {
+                const studentData = Object.entries(tallies.studentActions).map(([k, v]) => ({
+                    Category: 'Student',
+                    Action: k,
+                    Count: v
+                }));
+
+                const teacherData = Object.entries(tallies.teacherActions).map(([k, v]) => ({
+                    Category: 'Teacher',
+                    Action: k,
+                    Count: v
+                }));
+
+                const engagementData = [
+                    { Level: 'High', Percentage: engagementPercentages.High.toFixed(2) + '%' },
+                    { Level: 'Medium', Percentage: engagementPercentages.Med.toFixed(2) + '%' },
+                    { Level: 'Low', Percentage: engagementPercentages.Low.toFixed(2) + '%' },
+                ];
+
+                const totalIntervals = [
+                    { Info: 'Total Intervals', Value: tallies.totalIntervals }
+                ];
+
+                const scheduleInfo = [];
+                if (typeof scheduleDetails !== 'undefined' && scheduleDetails) {
+                    scheduleInfo.push({ Field: 'Name', Value: `${scheduleDetails.firstname} ${scheduleDetails.lastname}` });
+                    scheduleInfo.push({ Field: 'Department', Value: scheduleDetails.department });
+                    scheduleInfo.push({ Field: 'Date', Value: new Date(scheduleDetails.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) });
+                    scheduleInfo.push({ Field: 'Start Time', Value: scheduleDetails.start_time });
+                    scheduleInfo.push({ Field: 'End Time', Value: scheduleDetails.end_time });
+                    scheduleInfo.push({ Field: 'Year Level', Value: scheduleDetails.year_level });
+                    scheduleInfo.push({ Field: 'Semester', Value: scheduleDetails.semester });
+                    scheduleInfo.push({ Field: 'Subject Code', Value: scheduleDetails.subject_code });
+                    scheduleInfo.push({ Field: 'Subject Name', Value: scheduleDetails.subject });
+                    scheduleInfo.push({ Field: 'Observer', Value: scheduleDetails.observer });
+                    scheduleInfo.push({ Field: 'Copus', Value: scheduleDetails.copus });
+                    scheduleInfo.push({ Field: 'Mode', Value: scheduleDetails.modality });
+                }
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                const actionSheet = XLSX.utils.json_to_sheet([...studentData, {}, ...teacherData]);
+                const engagementSheet = XLSX.utils.json_to_sheet(engagementData);
+                const totalSheet = XLSX.utils.json_to_sheet(totalIntervals);
+                const scheduleSheet = XLSX.utils.json_to_sheet(scheduleInfo);
+
+                XLSX.utils.book_append_sheet(wb, actionSheet, 'Actions');
+                XLSX.utils.book_append_sheet(wb, engagementSheet, 'Engagement');
+                XLSX.utils.book_append_sheet(wb, totalSheet, 'Summary');
+                XLSX.utils.book_append_sheet(wb, scheduleSheet, 'Schedule Details');
+
+                XLSX.writeFile(wb, 'COPUS_Observation_Result.xlsx');
+            });
+
+        <% } %> // End of if (tallies && engagementPercentages)
+    </script>
+</body>
+</html>

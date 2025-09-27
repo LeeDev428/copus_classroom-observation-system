@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Schedule Creation - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color-start: #2c5aa0;
+            --primary-color-end: #1a365d;
+            --accent-color: #ffd700;
+            --text-light: #ffffff;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .custom-sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-sidebar h6 {
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-sidebar small {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .custom-sidebar hr {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-sidebar a {
+            color: var(--text-light);
+            text-decoration: none;
+            display: block;
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .custom-sidebar a i {
+            margin-right: 0.75rem;
+        }
+
+        .custom-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+        }
+
+        .custom-sidebar a.active {
+            background: var(--accent-color);
+            color: var(--text-dark);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--accent-color);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25);
+            color: var(--text-light);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            border: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #e6c200;
+            transform: translateY(-2px);
+        }
+
+        .faculty-selection {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .faculty-checkbox {
+            margin-bottom: 0.5rem;
+        }
+
+        .faculty-checkbox input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.4);
+            color: #d4edda;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.4);
+            color: #f8d7da;
+        }
+
+        @media (max-width: 768px) {
+            .custom-sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="custom-sidebar">
+                <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+                <small><%= employeeId %></small>
+                <hr>
+                <a href="/admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+                <a href="/admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+                <a href="/admin_weekly_schedule_creation" class="active"><i class="bi bi-calendar-plus"></i> Create Weekly Schedules</a>
+                <a href="/admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+                <a href="/admin_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+                <a href="/admin_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+                <hr>
+                <form action="/logout" method="POST">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <h1 class="page-title">Create Weekly Faculty Schedules</h1>
+                
+                <!-- Flash Messages -->
+                <% if (success_msg && success_msg.length > 0) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <%= success_msg %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+                
+                <% if (error_msg && error_msg.length > 0) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <%= error_msg %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
+
+                <div class="card">
+                    <form method="POST" action="/admin_create_weekly_schedule" id="weeklyScheduleForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="startTime" class="form-label">Start Time</label>
+                                <input type="time" class="form-control" id="startTime" name="startTime" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="endTime" class="form-label">End Time</label>
+                                <input type="time" class="form-control" id="endTime" name="endTime" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="yearLevel" class="form-label">Year Level</label>
+                                <select class="form-select" id="yearLevel" name="yearLevel" required>
+                                    <option value="">Select Year Level</option>
+                                    <option value="1st Year">1st Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="3rd Year">3rd Year</option>
+                                    <option value="4th Year">4th Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="schoolYear" class="form-label">School Year</label>
+                                <input type="text" class="form-control" id="schoolYear" name="schoolYear" 
+                                       placeholder="e.g., 2023-2024" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="semester" class="form-label">Semester</label>
+                                <select class="form-select" id="semester" name="semester" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="Semester 1">Semester 1</option>
+                                    <option value="Semester 2">Semester 2</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="modality" class="form-label">Modality</label>
+                                <select class="form-select" id="modality" name="modality" required>
+                                    <option value="">Select Modality</option>
+                                    <option value="RAD">RAD (Face-to-Face)</option>
+                                    <option value="FLEX">FLEX (Flexible)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="faculty-selection">
+                            <label class="form-label">Select Faculty Members</label>
+                            <div class="row">
+                                <% if (facultyMembers && facultyMembers.length > 0) { %>
+                                    <% facultyMembers.forEach(faculty => { %>
+                                        <div class="col-md-6 faculty-checkbox">
+                                            <input type="checkbox" name="selectedFaculty" value="<%= faculty._id %>" 
+                                                   id="faculty_<%= faculty._id %>">
+                                            <label for="faculty_<%= faculty._id %>">
+                                                <%= faculty.firstname %> <%= faculty.lastname %> 
+                                                (<%= faculty.department %>)
+                                            </label>
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <p class="text-muted">No faculty members found.</p>
+                                <% } %>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-light" onclick="selectAllFaculty()">
+                                    Select All
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-light ms-2" onclick="clearAllFaculty()">
+                                    Clear All
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Create Weekly Schedules
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h5 class="mb-3">Instructions</h5>
+                    <ul>
+                        <li>This will create daily schedules for all selected faculty members from Monday to Saturday.</li>
+                        <li>Sundays are automatically excluded from schedule creation.</li>
+                        <li>ALC observers will later create specific observation slots from these template schedules.</li>
+                        <li>Faculty members can then select from the observation slots created by ALC.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function selectAllFaculty() {
+            const checkboxes = document.querySelectorAll('input[name="selectedFaculty"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+        }
+
+        function clearAllFaculty() {
+            const checkboxes = document.querySelectorAll('input[name="selectedFaculty"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+        }
+
+        // Form validation
+        document.getElementById('weeklyScheduleForm').addEventListener('submit', function(e) {
+            const selectedFaculty = document.querySelectorAll('input[name="selectedFaculty"]:checked');
+            if (selectedFaculty.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one faculty member.');
+                return false;
+            }
+
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            
+            if (endDate < startDate) {
+                e.preventDefault();
+                alert('End date must be after start date.');
+                return false;
+            }
+        });
+
+        // Set minimum date to today
+        document.getElementById('startDate').min = new Date().toISOString().split('T')[0];
+        document.getElementById('endDate').min = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>

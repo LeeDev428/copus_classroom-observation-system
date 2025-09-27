@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Super Admin Setting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* --- Root Variables --- */
+    :root {
+      --primary-color-start: #0f2027; /* Dark blue */
+      --primary-color-end: #203a43; /* Darker blue */
+      --secondary-color-start: #2c5364; /* Blue-green */
+      --secondary-color-end: #203a43; /* Darker blue */
+      --text-light: #e0e0e0;
+      --text-dark: #333;
+      --sidebar-width: 280px;
+      --accent-color: #17e891; /* A vibrant green for accents */
+      --danger-color: #e74c3c; /* Red for logout/cancel */
+      --card-bg-transparent: rgba(255, 255, 255, 0.05);
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- Base Styles --- */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+      color: var(--text-light);
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container-fluid {
+      padding: 0;
+    }
+
+    .row {
+      margin: 0;
+    }
+
+    /* --- Header Styles (if needed, although the new HTML removed it) --- */
+    header {
+      display: none;
+    }
+
+    /* --- Sidebar --- */
+    .custom-sidebar {
+      width: var(--sidebar-width);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, #11405b, #0f2027);
+      color: var(--text-light);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+    }
+
+    .custom-sidebar h6 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .custom-sidebar small {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .custom-sidebar hr {
+      border-color: rgba(255, 255, 255, 0.1);
+      margin: 1.5rem 0;
+    }
+
+    .custom-sidebar a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      transition: background 0.3s, color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .custom-sidebar a i {
+      font-size: 1.25rem;
+    }
+
+    .custom-sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--accent-color);
+    }
+
+    .custom-sidebar a.active {
+      background: linear-gradient(to right, #2c5364, #203a43);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      color: #fff;
+    }
+
+    .logout-btn {
+      background: linear-gradient(to right, #e74c3c, #c0392b);
+      border: none;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      text-align: left;
+      width: 100%;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Main Content --- */
+    .main-content {
+  overflow-y: hidden; /* Changed from auto to hidden */
+  width: 80%;
+  margin-left: 330px;
+}
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    /* --- Profile Header --- */
+    .profile-header {
+      background: linear-gradient(45deg, #2c5364, #203a43);
+      padding: 1rem 1.5rem;
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-info img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #fff;
+      margin-right: 1rem;
+    }
+
+    .profile-info .name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0;
+      color: #fff;
+    }
+
+    .lock-icon {
+      font-size: 1.5rem;
+      color: #fff;
+    }
+/* --- Form Sections --- */
+.form-section {
+  background: var(--card-bg-transparent);
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-section hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 0.75rem 0 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-group {
+  flex: 1 1 calc(33.333% - 1rem);
+  min-width: 150px; /* Decreased min-width for smaller fields */
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.4rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group label.short-label {
+  font-size: 0.7rem; /* Even smaller for short labels */
+  letter-spacing: 0.2px;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.5rem 0.7rem; /* Decreased padding to make fields smaller */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-light);
+  transition: all 0.3s;
+  font-size: 0.85rem; /* Decreased font size for a smaller look */
+  max-width: 300px; /* Add a max-width to prevent them from getting too wide */
+}
+
+/* ... other styles ... */
+
+    .primary-btn {
+      background: linear-gradient(to right, #17e891, #17c87c);
+      border: none;
+      color: var(--text-dark);
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0.75rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(23, 232, 145, 0.3);
+    }
+
+    /* --- Password Section --- */
+    .password-form .form-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .password-form .form-fields {
+      flex: 1;
+      width: 100%;
+    }
+
+    .password-form .fof {
+      margin-bottom: 0.75rem;
+    }
+
+    .password-form .help-img {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 0.75rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .password-form .help-img img {
+      width: 100%;
+      max-width: 120px;
+      height: auto;
+    }
+
+    /* --- Modals --- */
+    .modal-content {
+      background-color: var(--primary-color-start);
+      color: var(--text-light);
+      border: 1px solid var(--border-color);
+      border-radius: 15px;
+    }
+
+    .modal-header {
+      background: linear-gradient(to right, #2c5364, #203a43);
+      border-bottom: none;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      color: #fff;
+    }
+
+    .btn-close-white {
+      filter: invert(1);
+    }
+
+    .modal-body .form-label {
+      color: var(--text-light);
+    }
+
+    /* Review Content in Profile Update Modal */
+    #profileUpdateReviewContent {
+      font-size: 0.9rem;
+    }
+
+    #profileUpdateReviewContent strong {
+      color: #fff;
+    }
+
+    /* --- Responsive Design --- */
+    @media (min-width: 769px) {
+      .password-form .form-content {
+        flex-direction: row;
+      }
+      .form-group {
+        flex: 1 1 calc(33.333% - 1rem);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .form-group {
+        flex: 1 1 100%;
+      }
+      .password-form .form-content {
+        flex-direction: column;
+      }
+      .password-form .help-img {
+        width: 100%;
+        height: 120px;
+      }
+      .main-content {
+        padding-top: 2rem;
+      }
+      .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+      }
+      .profile-info {
+        flex-direction: column;
+        text-align: center;
+      }
+      .profile-info img {
+        margin: 0 0 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="/images/copus.png" alt="COPUS Logo">
+    </div>
+    <div class="header-icons">
+      <i class="bi bi-bell-fill" style="color: black;"></i>
+      <div class="user-icon-circle">
+        <i class="bi bi-person-fill"></i>
+      </div>
+      <i class="bi bi-caret-down-fill"></i>
+    </div>
+  </header> 
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="custom-sidebar">
+        <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+        <small><%= employeeId %></small>
+        <hr>
+        <a href="/super_admin_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/super_admin_user_management"><i class="bi bi-people-fill"></i> User Management</a>
+        <a href="/super_admin_copus"><i class="bi bi-book"></i> Copus</a>
+        <a href="/super_admin_schedule"><i class="bi bi-calendar-event-fill"></i> Schedule</a>
+        <a href="/super_admin_copus_result"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+        <a href="/super_admin_copus_history" ><i class="bi bi-clock-history"></i> Copus History</a>
+        <a href="/super_admin_setting" class="active"><i class="bi bi-gear-fill"></i>Account & Profile Settings</a>
+        <hr>
+        <form action="/logout" method="POST">
+          <button type="submit" class="logout-btn">Logout</button>
+        </form>
+      </div>
+
+      <div class="main-content">
+        <h5 class="section-title">ACCOUNT SETTINGS</h5>
+    
+        <div class="profile-header">
+          <div class="profile-info">
+            <img src="/images/data-analytics-role.jpg" alt="Profile">
+            <div>
+              <h6 class="name"><%= firstName %> <%= lastName %></h6>
+            </div>
+          </div>
+          <span class="lock-icon">&#128274;</span>
+        </div>
+    
+        <div class="form-section">
+          <h6 class="section-subtitle">PROFILE INFORMATION</h6>
+          <hr>
+          <form id="profileInfoForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstname">FIRST NAME *</label>
+                <input type="text" id="firstname" class="form-control" placeholder="First Name" name="firstname" value="<%= currentUser.firstname || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="lastname">LAST NAME *</label>
+                <input type="text" id="lastname" class="form-control" placeholder="Last Name" name="lastname" value="<%= currentUser.lastname || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="middleInitial" class="short-label">MIDDLE INITIAL</label>
+                <input type="text" id="middleInitial" class="form-control" placeholder="Middle Initial" name="middleInitial" value="<%= currentUser.middleInitial || '' %>" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email" class="short-label">PHINMA EMAIL *</label>
+                <input type="email" id="email" class="form-control" placeholder="PHINMA Email" name="email" value="<%= currentUser.email || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="department">DEPARTMENT *</label>
+                <input type="text" id="department" class="form-control" placeholder="Department" name="department" value="<%= currentUser.department || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="dean">DEAN *</label>
+                <input type="text" id="dean" class="form-control" placeholder="Dean" name="dean" value="<%= currentUser.dean || '' %>" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="assignedProgramHead" class="short-label">ASSIGNED PROGRAM HEAD</label>
+                <input type="text" id="assignedProgramHead" class="form-control" placeholder="Assigned Program Head" name="assignedProgramHead" value="<%= currentUser.assignedProgramHead || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="yearsOfTeachingExperience" class="short-label">YEARS TEACHING PHINMA ED *</label>
+                <input type="text" id="yearsOfTeachingExperience" class="form-control" placeholder="Years of Teaching" name="yearsOfTeachingExperience" value="<%= currentUser.yearsOfTeachingExperience || '' %>" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="yearHired">YEAR HIRED *</label>
+                <input type="text" id="yearHired" class="form-control" placeholder="Year Hired" name="yearHired" value="<%= currentUser.yearHired || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="yearRegularized" class="short-label">YEAR REGULARIZED *</label>
+                <input type="text" id="yearRegularized" class="form-control" placeholder="Year Regularized" name="yearRegularized" value="<%= currentUser.yearRegularized || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="highestEducationalAttainment" class="short-label">HIGHEST ED. ATTAINMENT *</label>
+                <input type="text" id="highestEducationalAttainment" class="form-control" placeholder="Educational Attainment" name="highestEducationalAttainment" value="<%= currentUser.highestEducationalAttainment || '' %>" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="professionalLicense" class="short-label">PROF. LICENSE *</label>
+                <input type="text" id="professionalLicense" class="form-control" placeholder="Professional License" name="professionalLicense" value="<%= currentUser.professionalLicense || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="employmentStatus">EMPLOYMENT STATUS *</label>
+                <input type="text" id="employmentStatus" class="form-control" placeholder="Employment Status" name="employmentStatus" value="<%= currentUser.employmentStatus || '' %>" readonly>
+              </div>
+              <div class="form-group">
+                <label for="rank">RANK *</label>
+                <input type="text" id="rank" class="form-control" placeholder="Rank" name="rank" value="<%= currentUser.rank || '' %>" readonly>
+              </div>
+            </div>
+            <button type="button" id="updateProfileInfoBtn" class="primary-btn">UPDATE INFORMATION</button>
+          </form>
+        </div>
+
+        <div class="modal fade" id="confirmProfileUpdateModal" tabindex="-1" aria-labelledby="confirmProfileUpdateModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="confirmProfileUpdateModalLabel">Edit Profile Information</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div id="profileUpdateReviewContent" class="p-3"></div>
+                <div id="profileUpdateErrorAlert" class="alert alert-danger mt-3" style="display:none;" role="alert"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="submitProfileUpdateBtn" class="btn btn-primary">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <div class="form-section">
+          <h6 class="section-subtitle">PASSWORD</h6>
+          <hr>
+          <form class="password-form">
+            <div class="form-content">
+              <div class="form-fields">
+                <div class="fof">
+                  <label>CURRENT PASSWORD *</label>
+                  <input type="password" placeholder="Current Password" readonly>
+                </div>
+                <div class="fof">
+                  <label>NEW PASSWORD *</label>
+                  <input type="password" placeholder="New Password" readonly>
+                </div>
+                <div class="fof">
+                  <label>RE-TYPE NEW PASSWORD *</label>
+                  <input type="password" placeholder="Confirm New Password" readonly>
+                </div>
+              </div>
+              
+              <div class="help-img">
+                <img src="https://cdn-icons-png.flaticon.com/512/3106/3106921.png" alt="Password Help">
+              </div>
+            </div>
+            <button type="button" class="primary-btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal">UPDATE PASSWORD</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label">CURRENT PASSWORD *</label>
+              <input type="password" class="form-control" id="currentPassword" name="currentPassword" placeholder="Current Password" required>
+            </div>
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">NEW PASSWORD *</label>
+              <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="New Password" required>
+            </div>
+            <div class="mb-3">
+              <label for="confirmNewPassword" class="form-label">RE-TYPE NEW PASSWORD *</label>
+              <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm New Password" required>
+            </div>
+            <div id="passwordErrorAlert" class="alert alert-danger mt-3" style="display:none;" role="alert"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="submitChangePasswordBtn" class="btn btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/Super_Admin/setting.js"></script>
+</body>
+</html>

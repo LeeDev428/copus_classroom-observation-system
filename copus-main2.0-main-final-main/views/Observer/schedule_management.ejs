@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Observer Schedule Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color-start: #0f2027; /* Dark blue */
+            --primary-color-end: #203a43; /* Darker blue */
+            --secondary-color-start: #2c5364; /* Blue-green */
+            --secondary-color-end: #203a43; /* Darker blue */
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Header styles */
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logo img {
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-left: -150px;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .header-icons i {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .header-icons i:hover {
+            color: #17e891;
+        }
+        .user-icon-circle {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+        }
+
+        /* Sidebar styles */
+        .custom-sidebar {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #101c23, #0f2027);
+            color: var(--text-light);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        .custom-sidebar h6 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+        
+        .custom-sidebar small {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .custom-sidebar hr {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .custom-sidebar a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .custom-sidebar a i {
+            font-size: 1.25rem;
+        }
+
+        .custom-sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #17e891;
+        }
+
+        .custom-sidebar a.active {
+            background: linear-gradient(to right, #2c5364, #203a43);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+
+        .logout-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border: none;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main content styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 7rem 2rem 2rem 2rem;
+            transition: margin-left 0.3s ease-in-out;
+            margin-top: -70px;
+        }
+        
+        .card-border {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: #17e891;
+            color: var(--text-light);
+            box-shadow: none;
+        }
+
+        .flash-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        .flash-message.success {
+            background-color: rgba(23, 232, 145, 0.2);
+            color: #17e891;
+            border: 1px solid #17e891;
+        }
+        .flash-message.error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+       .custom-table {
+  background: linear-gradient(to right, #0f2027, #2c5364); /* Dark blue to greenish */
+  color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-table thead {
+  background: rgba(0, 0, 0, 0.2);
+  color: #17e891; /* Accent green for headers */
+}
+
+.custom-table thead th {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-table tbody tr {
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.3s ease;
+}
+
+.custom-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-table td, 
+.custom-table th {
+  vertical-align: middle;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Optional: Rounded corners on top only */
+.custom-table thead:first-child th:first-child {
+  border-top-left-radius: 12px;
+}
+.custom-table thead:first-child th:last-child {
+  border-top-right-radius: 12px;
+}
+
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+        .modal-header, .modal-footer {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .modal-title {
+            color: #fff;
+        }
+        .btn-close {
+            filter: invert(1) brightness(2);
+        }
+
+        .btn-success {
+            background-color: #17e891;
+            border-color: #17e891;
+            color: #0f2027;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            border-color: #e74c3c;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        .btn-secondary {
+            background-color: #7f8c8d;
+            border-color: #7f8c8d;
+        }
+
+        .badge.bg-warning { background-color: #f1c40f !important; color: #333 !important; }
+        .badge.bg-info { background-color: #3498db !important; color: #fff !important; }
+        .badge.bg-primary { background-color: #3498db !important; color: #fff !important; }
+        .badge.bg-success { background-color: #17e891 !important; color: #333 !important; }
+        .badge.bg-danger { background-color: #e74c3c !important; color: #fff !important; }
+        .badge.bg-secondary { background-color: #7f8c8d !important; color: #fff !important; }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .custom-sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        .pagination-container {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 0;
+  border-radius: 4px;
+}
+
+.pagination li {
+  display: inline;
+}
+
+.pagination a {
+  color: #007bff;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  border: 1px solid #ddd;
+  margin: 0 4px;
+  border-radius: 4px;
+}
+
+.pagination a:hover:not(.active) {
+  background-color: #eee;
+}
+
+.pagination a.active {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
+
+        
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Sidebar -->
+        <div class="custom-sidebar">
+            <h6>Welcome, <%= firstName %> <%= lastName %></h6>
+            <small><%= employeeId %></small>
+            <hr />
+            <a href="/Observer_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="/Observer_copus"><i class="bi bi-book"></i> Copus</a>
+            <a href="/Observer_copus_result"><i class="bi bi-people-fill"></i> Copus Result</a>
+            <a href="/Observer_copus_history"><i class="bi bi-calendar-event-fill"></i> Copus History</a>
+            <a href="/observer_schedule_management" class="active"><i class="bi bi-clipboard-data"></i> Schedule</a>
+            <a href="/Observer_setting"><i class="bi bi-gear-fill"></i> Settings</a>
+            <hr />
+            <form action="/logout" method="POST">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+
+        <<main class="main-content">
+        <div class="card-border" id="scheduleManagementView">
+            <div class="section-title title-with-icon d-flex justify-content-between align-items-center">
+                <span>SCHEDULE MANAGEMENT</span>
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search schedules..."
+                    class="form-control form-control-sm w-auto"
+                />
+            </div>
+
+            <% if (success_msg && success_msg.length > 0) { %>
+            <div class="flash-message success">
+                <%= success_msg %>
+            </div>
+            <% } %>
+            <% if (error_msg && error_msg.length > 0) { %>
+            <div class="flash-message error">
+                <%= error_msg %>
+            </div>
+            <% } %>
+
+            <div class="table-responsive">
+                <table class="custom-table table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Faculty Name</th>
+                            <th>Faculty Department</th>
+                            <th>Date</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Year Level</th>
+                            <th>Semester</th>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Modality</th>
+                            <th>Room</th>
+                            <th>Copus Type</th>
+                            <th>Overall Schedule Status</th>
+                            <th>My Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (observerSchedules.length === 0) { %>
+                        <tr>
+                            <td colspan="15" class="text-center">No schedule records found.</td>
+                        </tr>
+                        <% } else { %>
+                        <% observerSchedules.forEach(schedule => {
+                            const currentObserverEntry = schedule.observers.find(
+                                obs => obs.observer_id.toString() === currentUser._id.toString()
+                            );
+                            const myStatus = currentObserverEntry ? currentObserverEntry.status : 'N/A';
+                        %>
+                        <tr>
+                            <td><%= schedule.faculty_firstname %> <%= schedule.faculty_lastname %></td>
+                            <td><%= schedule.faculty_department %></td>
+                            <td><%= new Date(schedule.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></td>
+                            <td><%= schedule.start_time %></td>
+                            <td><%= schedule.end_time %></td>
+                            <td><%= schedule.year_level %></td>
+                            <td><%= schedule.semester %></td>
+                            <td><%= schedule.faculty_subject_code %></td>
+                            <td><%= schedule.faculty_subject_name %></td>
+                            <td><%= schedule.modality %></td>
+                            <td><%= schedule.faculty_room %></td>
+                            <td><%= schedule.copus_type %></td>
+                            <td>
+                                <span class="badge
+                                    <%= schedule.status === 'pending' ? 'bg-warning' :
+                                        schedule.status === 'scheduled' ? 'bg-info' :
+                                        schedule.status === 'approved' ? 'bg-primary' :
+                                        schedule.status === 'completed' ? 'bg-success' :
+                                        'bg-danger' %>">
+                                    <%= schedule.status %>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    <%= myStatus === 'pending' ? 'bg-warning' :
+                                        myStatus === 'accepted' ? 'bg-success' :
+                                        myStatus === 'declined' ? 'bg-danger' :
+                                        'bg-secondary' %>">
+                                    <%= myStatus %>
+                                </span>
+                            </td>
+                            <td>
+                                <% if (myStatus === 'pending') { %>
+                                <form action="/observer/schedule/<%= schedule._id %>/accept" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                                </form>
+                                <form action="/observer/schedule/<%= schedule._id %>/decline" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Decline</button>
+                                </form>
+                                <% } else if (myStatus === 'accepted' && schedule.status === 'scheduled') { %>
+                                <form action="/observer/schedule/complete/<%= schedule._id %>" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-primary">Mark Complete</button>
+                                </form>
+                                <% } else { %>
+                                <button class="btn btn-sm btn-secondary" disabled>No Action</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+                <div class="pagination-container"></div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" id="editScheduleForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Schedule</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="edit-id" />
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Faculty Firstname</label>
+                                <input type="text" name="faculty_firstname" id="edit-faculty-firstname" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Faculty Lastname</label>
+                                <input type="text" name="faculty_lastname" id="edit-faculty-lastname" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Faculty Department</label>
+                                <input type="text" name="faculty_department" id="edit-faculty-department" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Date</label>
+                                <input type="date" name="date" id="edit-date" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Start Time</label>
+                                <input type="time" name="start_time" id="edit-start-time" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>End Time</label>
+                                <input type="time" name="end_time" id="edit-end-time" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Year Level</label>
+                                <input type="text" name="year_level" id="edit-year-level" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Semester</label>
+                                <input type="text" name="semester" id="edit-semester" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Subject Code</label>
+                                <input type="text" name="faculty_subject_code" id="edit-subject-code" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Subject Name</label>
+                                <input type="text" name="faculty_subject_name" id="edit-subject-name" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Modality</label>
+                                <input type="text" name="modality" id="edit-modality" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Room</label>
+                                <input type="text" name="faculty_room" id="edit-room" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Status</label>
+                                <input type="text" name="status" id="edit-status" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You have no new notifications.</p>
+                    <p>Example: New COPUS result for [Faculty Name] is available.</p>
+                    <p>Example: Appointment scheduled with [Faculty Name] on [Date] at [Time].</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">View All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/Observer/schedule_management.js"></script>
+</body>
+</html>

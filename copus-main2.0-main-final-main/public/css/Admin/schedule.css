@@ -1,0 +1,345 @@
+/* General body and container styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding-top: 70px; /* Space for fixed header */
+    overflow-x: hidden;
+}
+
+.main-container {
+    display: flex;
+}
+
+.main-content {
+    margin-left: 280px; /* Adjust to match the sidebar's width */
+    width: calc(100% - 280px);
+    padding: 40px;
+    background-color: #f4f7fb;
+    min-height: 100vh;
+    box-sizing: border-box;
+    margin-top: auto;
+}
+
+/* Header */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2d4e89;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    z-index: 1100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    background: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-icon-circle {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 2px solid #2d4e89;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-icon-circle i {
+    font-size: 24px;
+    color: #2d4e89;
+}
+
+/* Sidebar */
+.custom-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, #2d4e89, #006400);
+    padding: 25px 20px;
+    width: 280px;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.custom-sidebar h6,
+.custom-sidebar small {
+    color: white;
+    font-weight: 600;
+    text-align: center;
+}
+
+.custom-sidebar hr {
+    border: none;
+    height: 1px;
+    background: #eee;
+    margin: 10px 0;
+}
+
+.custom-sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    margin: 5px 0;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.custom-sidebar a i {
+    font-size: 18px;
+}
+
+.custom-sidebar a:hover,
+.custom-sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateX(4px);
+}
+
+.logout-btn {
+    margin-top: 20px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid white;
+    color: white;
+    border-radius: 25px;
+    padding: 10px 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: white;
+    color: #2d4e89;
+}
+
+/* Dashboard metrics */
+.metric-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.metric-card {
+    flex: 1;
+    background-color: white;
+    color: #2d4e89;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 35px;
+    border-radius: 5px;
+}
+
+.metric-card small {
+    display: block;
+    margin-top: 5px;
+    color: black;
+    font-size: 14px;
+}
+
+/* Section titles */
+.section-title {
+    font-weight: bold;
+    color: #2d4e89;
+    margin-top: 30px;
+    background-color: white;
+}
+
+.title-with-icon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 10px;
+}
+
+.title-with-icon i {
+    font-size: 25px;
+    cursor: pointer;
+}
+
+/* Table styles */
+.table-responsive {
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.custom-table th,
+.custom-table td {
+    border: 1.5px solid #ccc;
+    padding: 8px;
+    font-size: 10px; /* Adjust as needed */
+    text-align: center;
+}
+
+.status-pending {
+    color: #f0ad4e; /* Use a color that matches the "pending" status from the image */
+    font-weight: bold;
+}
+
+.action-cancel {
+    background-color: #d9534f;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.action-edit {
+    background-color: #2d4e89;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+/* Add User Form styles */
+#addUserView {
+    display: none;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.header-pill {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.add-user-form {
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.form-group.half {
+    flex: 0 0 calc(50% - 10px); /* Use calc to account for gap */
+}
+
+.form-group.third {
+    flex: 0 0 calc(33.333% - 13.333px); /* Use calc to account for gap */
+}
+
+label {
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+input,
+select {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    border-radius: 50px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #007bff;
+}
+
+.required {
+    color: red;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Corrected classes */
+.he {
+    color: black;
+    font-size: 20px;
+}
+
+.card-border {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    background-color: white;
+}
+
+.rar {
+    color: red;
+}
+
+.palamig, .buga, .baba {
+    /* These classes seem to have very specific, potentially incorrect, stylings.
+       They were removed or generalized for better practices. */
+}

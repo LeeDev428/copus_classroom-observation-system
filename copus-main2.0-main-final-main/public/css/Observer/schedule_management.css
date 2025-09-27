@@ -1,0 +1,287 @@
+/* =====================================
+ * General Body & Header Styles
+ * ===================================== */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fb;
+    padding-top: 70px; /* Provides space for the fixed header */
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #2d4e89;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    z-index: 1100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    background: white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-icon-circle {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border: 2px solid #2d4e89;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-icon-circle i {
+    font-size: 24px;
+    color: #2d4e89;
+}
+
+/* =====================================
+ * Sidebar Styles
+ * ===================================== */
+.custom-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, #2d4e89, #006400);
+    padding: 25px 20px;
+    width: 280px;
+    height: 100vh;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.custom-sidebar h6,
+.custom-sidebar small {
+    color: white;
+    font-weight: 600;
+    text-align: center;
+}
+
+.custom-sidebar hr {
+    border: none;
+    height: 1px;
+    background: #eee;
+    margin: 10px 0;
+}
+
+.custom-sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    margin: 5px 0;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.custom-sidebar a i {
+    font-size: 18px;
+}
+
+.custom-sidebar a:hover,
+.custom-sidebar a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateX(4px);
+}
+
+.logout-btn {
+    margin-top: 20px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid white;
+    color: white;
+    border-radius: 25px;
+    padding: 10px 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: white;
+    color: #2d4e89;
+}
+
+/* =====================================
+ * Main Content Styles
+ * ===================================== */
+.main-content {
+    margin-left: 280px; /* Match sidebar width */
+    width: calc(100% - 280px); /* Correct remaining width */
+    padding: 40px;
+    background-color: #f4f7fb;
+    min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+
+.main-content h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2d4e89;
+    border-left: 5px solid #2d4e89;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+/* Make the table wrapper scroll horizontally on small screens */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    margin-top: 30px;
+}
+
+/* Allow dynamic sizing */
+.custom-table {
+    width: max-content; /* ✅ Allow full width if needed */
+    min-width: 100%;    /* ✅ Prevent it from shrinking too much */
+    border-collapse: collapse;
+    font-size: 14px;
+    table-layout: auto;
+}
+
+/* Table header and cell styling */
+.custom-table th,
+.custom-table td {
+    padding: 12px 10px;
+    border: 1px solid #d0d7e2;
+    text-align: center;
+    white-space: nowrap;      /* ✅ Prevent wrapping */
+    word-break: keep-all;
+}
+
+/* Responsive scroll helper for small screens */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .custom-table th,
+    .custom-table td {
+        font-size: 12px;
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+}
+
+/* =====================================
+ * Badge Styles
+ * ===================================== */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    border-radius: 1rem;
+}
+
+/* =====================================
+ * Flash Message
+ * ===================================== */
+.flash-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.flash-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* =====================================
+ * Pagination Styling
+ * ===================================== */
+.pagination-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.pagination-btn {
+    background: #f0f0f0;
+    border: none;
+    margin: 0 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+
+.pagination-btn:hover {
+    background: #dcdcdc;
+}
+
+.pagination-btn.active {
+    background: #007bff;
+    color: white;
+    font-weight: bold;
+    cursor: default;
+}
+
+/* =====================================
+ * Responsive Fixes
+ * ===================================== */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .custom-sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .custom-table th,
+    .custom-table td {
+        font-size: 12px;
+        padding: 8px 5px;
+        max-width: 100px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
