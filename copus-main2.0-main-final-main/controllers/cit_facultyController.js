@@ -851,7 +851,7 @@ const citFacultyController = {
         }
 
         // Fetch schedules for the logged-in faculty member
-        const schedules = await FacultySchedule.find({
+        const schedules = await Schedule.find({
             faculty_user_id: userId
         })
         .populate('faculty_user_id')
