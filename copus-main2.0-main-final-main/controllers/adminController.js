@@ -99,7 +99,7 @@ const adminController = {
             const employees = await User.find({ role: { $ne: 'admin' } }).sort({ lastname: 1 });
 
             // Fetch schedules to display them in the table
-           const schedules = await FacultySchedule.find({})
+           const schedules = await Schedule.find({})
     // Correctly populate the faculty_user_id and observers fields
    .populate('faculty_user_id')
     .sort({ date: 1, start_time: 1 });
@@ -134,10 +134,13 @@ const adminController = {
                 return res.status(404).json({ success: false, message: 'Faculty user not found.' });
             }
 
-            // Create the new schedule entry using the FacultySchedule model
-            const newSchedule = new FacultySchedule({
+            // Create the new schedule entry using the Schedule model
+            const newSchedule = new Schedule({
                 faculty_user_id: facultyUser._id,
-                image_path: req.file.path // Save the path provided by Multer
+                image_path: req.file.path, // Save the path provided by Multer
+                schedule_type: 'manual_upload', // Mark as manually uploaded schedule
+                created_by_role: 'admin',
+                created_by_user_id: req.session.user.id
             });
 
             // Save the new schedule to the database
