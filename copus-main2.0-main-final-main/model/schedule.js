@@ -24,38 +24,20 @@ const observerDetailSchema = new Schema({
 }, { _id: false });
 
 const scheduleSchema = new Schema({
-    date: { type: Date, required: true },
+    // Day of week for recurring schedules
+    day_of_week: { 
+        type: String, 
+        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 
+        required: true 
+    },
+    date: { type: Date, required: false }, // Made optional for recurring schedules
     start_time: { type: String, required: true },
     end_time: { type: String, required: true },
-    year_level: { type: String, required: true },
-    school_year: { type: String, required: true },
-    semester: { type: String, enum: ['Semester 1', 'Semester 2'], required: true },
-    modality: { type: String, enum: ['RAD', 'FLEX'], required: true },
+    year_level: { type: String, required: false }, // Made optional
+    school_year: { type: String, required: false }, // Made optional  
+    semester: { type: String, enum: ['Semester 1', 'Semester 2'], required: false }, // Made optional
+    modality: { type: String, enum: ['RAD', 'FLEX'], required: false }, // Made optional
     observers: [observerDetailSchema],
-    
-    // NEW FIELDS FOR COMPLETE WORKFLOW
-    schedule_type: {
-        type: String,
-        enum: ['admin_template', 'observation_slot', 'faculty_selected'],
-        default: 'admin_template',
-        required: true
-    },
-    created_by_role: {
-        type: String,
-        enum: ['super_admin', 'admin', 'Observer (ALC)', 'Observer (SLC)'],
-        required: true
-    },
-    created_by_user_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'employee',
-        required: true
-    },
-    template_schedule_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Schedule',
-        default: null // References admin template for observation slots
-    },
-    
     status: {
         type: String,
         enum: [
@@ -66,11 +48,16 @@ const scheduleSchema = new Schema({
             'cancelled',
             'completed',
             'rejected',
-            'in progress',
-            'available_for_selection' // NEW: ALC created slots waiting for faculty
+            'in progress'
         ],
-        default: 'pending',
+        default: 'scheduled',
         required: true
+    },
+    // Bulk schedule fields
+    schedule_type: {
+        type: String,
+        enum: ['individual', 'bulk_faculty'],
+        default: 'individual'
     },
     faculty_user_id: { type: Schema.Types.ObjectId, ref: 'employee', default: null },
     faculty_employee_id: { type: String, default: null },

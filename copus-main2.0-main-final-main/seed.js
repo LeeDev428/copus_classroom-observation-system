@@ -3,96 +3,148 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Employee = require('./model/employee'); // adjust path if different
 
-// Sample data with easy-to-remember credentials
+// Sample data - Using simple password 'password123' for all accounts
 const seedEmployees = [
   {
-      employeeId: 'admin',
+      employeeId: 'EMP001',
       department: 'IT',
-      lastname: 'Administrator',
-      firstname: 'Super',
+      lastname: 'Santos',
+      firstname: 'Juan',
       role: 'super_admin',
-      email: 'superadmin@copus.com',
-      password: 'admin123'
+      email: 'juan.santos@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'admin2',
-      department: 'Administration',
-      lastname: 'Manager',
-      firstname: 'Admin',
+      employeeId: 'EMP002',
+      department: 'Math',
+      lastname: 'Reyes',
+      firstname: 'Ana',
       role: 'admin',
-      email: 'admin@copus.com',
-      password: 'admin123'
+      email: 'ana.reyes@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'faculty1',
-      department: 'Computer Science',
-      lastname: 'Teacher',
-      firstname: 'Faculty',
+      employeeId: 'EMP003',
+      department: 'English',
+      lastname: 'Garcia',
+      firstname: 'Leo',
       role: 'Faculty',
-      email: 'faculty@copus.com',
-      password: 'faculty123'
+      email: 'leo.garcia@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'faculty2',
-      department: 'Mathematics',
-      lastname: 'Professor',
-      firstname: 'Math',
+      employeeId: 'EMP004',
+      department: 'Science',
+      lastname: 'Lopez',
+      firstname: 'Maria',
       role: 'Faculty',
-      email: 'math@copus.com',
-      password: 'faculty123'
+      email: 'maria.lopez@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'observer1',
-      department: 'Quality Assurance',
-      lastname: 'Watcher',
-      firstname: 'Observer',
+      employeeId: 'EMP005',
+      department: 'PE',
+      lastname: 'Cruz',
+      firstname: 'Pedro',
       role: 'Observer',
-      email: 'observer@copus.com',
-      password: 'observer123'
+      email: 'pedro.cruz@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'observer2',
-      department: 'Quality Assurance',
-      lastname: 'Monitor',
-      firstname: 'ALC',
-      role: 'Observer (ALC)',
-      email: 'alc@copus.com',
-      password: 'observer123'
+      employeeId: 'EMP006',
+      department: 'IT',
+      lastname: 'Fernandez',
+      firstname: 'Jose',
+      role: 'admin',
+      email: 'jose.fernandez@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'observer3',
-      department: 'Quality Assurance',
-      lastname: 'Reviewer',
-      firstname: 'SLC',
-      role: 'Observer (SLC)',
-      email: 'slc@copus.com',
-      password: 'observer123'
+      employeeId: 'EMP007',
+      department: 'Math',
+      lastname: 'Ramos',
+      firstname: 'Celia',
+      role: 'Observer',
+      email: 'celia.ramos@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     },
     {
-      employeeId: 'test1',
-      department: 'Testing',
-      lastname: 'User',
-      firstname: 'Test',
+      employeeId: 'EMP008',
+      department: 'English',
+      lastname: 'Torres',
+      firstname: 'Luis',
       role: 'Faculty',
-      email: 'test@copus.com',
-      password: 'test123'
+      email: 'luis.torres@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
+    },
+    {
+      employeeId: 'EMP009',
+      department: 'Science',
+      lastname: 'Delos Santos',
+      firstname: 'Rhea',
+      role: 'Faculty',
+      email: 'rhea.delos@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
+    },
+    {
+      employeeId: 'EMP010',
+      department: 'PE',
+      lastname: 'Morales',
+      firstname: 'Tito',
+      role: 'Observer',
+      email: 'tito.morales@example.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
+    },
+     {
+      employeeId: 'EMP011',
+      department: 'IT',
+      lastname: 'Torres',
+      firstname: 'Lee',
+      role: 'super_admin',
+      email: 'grafrafraftorres28@gmail.com',
+      password: 'password123',
+      status: 'Active',
+      isFirstLogin: false
     }
 ];
 
+// Load environment variables
+require('dotenv').config();
+
 async function seedDB() {
   try {
-    await mongoose.connect('mongodb+srv://copusAdmin:sK8ZGlLEuWsXavyc@cluster0.ugspmft.mongodb.net/copusDB?retryWrites=true&w=majority&appName=copusDB', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      });      
+    await mongoose.connect(process.env.MONGODB_URI);      
     console.log('✅ Connected to DB');
 
     await Employee.deleteMany({});
     console.log('🧹 Old employees removed');
 
     for (let emp of seedEmployees) {
-      // Don't hash password here - the schema pre-save middleware will handle it
+      console.log(`Creating employee ${emp.employeeId} with password: "${emp.password}"`);
+      
+      // Employee model pre-save hook will handle password hashing automatically
       await Employee.create(emp);
+      console.log(`✓ Created employee ${emp.employeeId}`);
     }
 
     console.log('🌱 Seed data inserted');

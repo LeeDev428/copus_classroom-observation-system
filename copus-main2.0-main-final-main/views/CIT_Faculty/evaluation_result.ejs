@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>COPUS Evaluation Result - CIT Faculty</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color-start: #0f2027;
+            --primary-color-end: #203a43;
+            --secondary-color-start: #2c5364;
+            --secondary-color-end: #203a43;
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(135deg, var(--secondary-color-start), var(--secondary-color-end));
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            padding: 2rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .sidebar .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin: 0.5rem 0;
+        }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar ul li a:hover,
+        .sidebar ul li a.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        .main-content h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .evaluation-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .final-score {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .final-rating {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .rating-great { color: #2ecc71; }
+        .rating-good { color: #3498db; }
+        .rating-needs-improvement { color: #f39c12; }
+        .rating-unsatisfactory { color: #e74c3c; }
+
+        .section-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .section-score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-info {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .schedule-info h3 {
+            color: #3498db;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #bbb;
+        }
+
+        .info-value {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .back-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .evaluation-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .evaluation-details h4 {
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .evaluation-details p {
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .blue { color: #3498db; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="/images/copus.png" alt="COPUS Logo">
+            <span>COPUS</span>
+        </div>
+        <ul>
+            <li><a href="/CIT_Faculty_dashboard"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
+            <li><a href="/CIT_Faculty_copus_result" class="active"><i class="bi bi-clipboard-data"></i>COPUS Result</a></li>
+            <li><a href="/CIT_Faculty_copus_history"><i class="bi bi-clock-history"></i>COPUS History</a></li>
+            <li><a href="/CIT_Faculty_copus_summary"><i class="bi bi-bar-chart"></i>COPUS Summary</a></li>
+            <li><a href="/CIT_Faculty_schedule_management"><i class="bi bi-calendar3"></i>Schedule Management</a></li>
+            <li><a href="/CIT_Faculty_setting"><i class="bi bi-gear"></i>Settings</a></li>
+            <li><a href="/logout"><i class="bi bi-box-arrow-right"></i>Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <img src="/images/copus.png" alt="COPUS Logo" style="width: 40px; height: 40px; margin-right: 10px;">
+            COPUS - CIT Faculty Portal
+        </div>
+        <div class="user-info">
+            <span>Welcome, <%= firstName %> <%= lastName %> | <%= employeeId %></span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <a href="/CIT_Faculty_copus_result" class="back-btn">
+            <i class="bi bi-arrow-left"></i>
+            Back to Results
+        </a>
+
+        <h1>📊 COPUS Evaluation Result</h1>
+
+        <!-- Display Flash Messages -->
+        <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <% if (evaluationResult) { %>
+            <!-- Schedule Information -->
+            <div class="schedule-info">
+                <h3><i class="bi bi-calendar-event"></i> Observation Details</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Faculty:</span>
+                        <span class="info-value"><%= firstName %> <%= lastName %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Observer:</span>
+                        <span class="info-value"><%= evaluationResult.observer_id ? evaluationResult.observer_id.firstname + ' ' + evaluationResult.observer_id.lastname : 'N/A' %></span>
+                    </div>
+                    <% if (observerSchedule) { %>
+                        <div class="info-item">
+                            <span class="info-label">Date:</span>
+                            <span class="info-value"><%= new Date(observerSchedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Time:</span>
+                            <span class="info-value"><%= observerSchedule.start_time %> - <%= observerSchedule.end_time %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Subject:</span>
+                            <span class="info-value"><%= observerSchedule.subject_name || 'N/A' %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Room:</span>
+                            <span class="info-value"><%= observerSchedule.room || 'N/A' %></span>
+                        </div>
+                    <% } %>
+                    <div class="info-item">
+                        <span class="info-label">Evaluation Date:</span>
+                        <span class="info-value"><%= new Date(evaluationResult.evaluation_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Score Display -->
+            <div class="score-display">
+                <div class="final-score"><%= evaluationResult.final_score %>%</div>
+                <% 
+                    let ratingClass = '';
+                    let ratingIcon = '';
+                    if (evaluationResult.final_rating === 'Great') {
+                        ratingClass = 'rating-great';
+                        ratingIcon = '🌟';
+                    } else if (evaluationResult.final_rating === 'Good') {
+                        ratingClass = 'rating-good';
+                        ratingIcon = '👍';
+                    } else if (evaluationResult.final_rating === 'Needs Improvement') {
+                        ratingClass = 'rating-needs-improvement';
+                        ratingIcon = '⚠️';
+                    } else {
+                        ratingClass = 'rating-unsatisfactory';
+                        ratingIcon = '❌';
+                    }
+                %>
+                <div class="final-rating <%= ratingClass %>">
+                    <%= ratingIcon %> <%= evaluationResult.final_rating %>
+                </div>
+                <p style="margin: 0; opacity: 0.8;">Overall Teaching Performance</p>
+            </div>
+
+            <!-- Section Scores -->
+            <div class="section-scores">
+                <div class="section-card">
+                    <div class="section-title">👥 Student Engagement</div>
+                    <div class="section-score"><%= evaluationResult.student_engagement_score %>%</div>
+                    <p style="margin: 0; opacity: 0.7; font-size: 0.9rem;">Active participation and involvement</p>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">🎓 Teacher Facilitation</div>
+                    <div class="section-score"><%= evaluationResult.teacher_facilitation_score %>%</div>
+                    <p style="margin: 0; opacity: 0.7; font-size: 0.9rem;">Instructional methods and guidance</p>
+                </div>
+                <div class="section-card">
+                    <div class="section-title">🏫 Learning Environment</div>
+                    <div class="section-score"><%= evaluationResult.learning_environment_score %>%</div>
+                    <p style="margin: 0; opacity: 0.7; font-size: 0.9rem;">Classroom atmosphere and setup</p>
+                </div>
+            </div>
+
+            <!-- Detailed Evaluation Results -->
+            <div class="evaluation-card">
+                <h3 style="color: #3498db; margin-bottom: 1.5rem;">📝 Detailed Assessment</h3>
+                
+                <!-- Student Engagement Details -->
+                <div class="evaluation-details">
+                    <h4>👥 Student Engagement (<%= evaluationResult.student_engagement_score %>%)</h4>
+                    <% if (evaluationResult.student_engagement) { %>
+                        <% Object.keys(evaluationResult.student_engagement).forEach(key => { %>
+                            <% if (key !== 'score' && evaluationResult.student_engagement[key] > 0) { %>
+                                <p><strong><%= key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>:</strong> <%= evaluationResult.student_engagement[key] %>%</p>
+                            <% } %>
+                        <% }); %>
+                    <% } %>
+                </div>
+
+                <!-- Teacher Facilitation Details -->
+                <div class="evaluation-details">
+                    <h4>🎓 Teacher Facilitation (<%= evaluationResult.teacher_facilitation_score %>%)</h4>
+                    <% if (evaluationResult.teacher_facilitation) { %>
+                        <% Object.keys(evaluationResult.teacher_facilitation).forEach(key => { %>
+                            <% if (key !== 'score' && evaluationResult.teacher_facilitation[key] > 0) { %>
+                                <p><strong><%= key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>:</strong> <%= evaluationResult.teacher_facilitation[key] %>%</p>
+                            <% } %>
+                        <% }); %>
+                    <% } %>
+                </div>
+
+                <!-- Learning Environment Details -->
+                <div class="evaluation-details">
+                    <h4>🏫 Learning Environment (<%= evaluationResult.learning_environment_score %>%)</h4>
+                    <% if (evaluationResult.learning_environment) { %>
+                        <% Object.keys(evaluationResult.learning_environment).forEach(key => { %>
+                            <% if (key !== 'score' && evaluationResult.learning_environment[key] > 0) { %>
+                                <p><strong><%= key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %>:</strong> <%= evaluationResult.learning_environment[key] %>%</p>
+                            <% } %>
+                        <% }); %>
+                    <% } %>
+                </div>
+
+                <!-- Overall Assessment -->
+                <% if (evaluationResult.overall_assessment && evaluationResult.overall_assessment.trim()) { %>
+                    <div class="evaluation-details">
+                        <h4>📋 Overall Assessment</h4>
+                        <p style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; line-height: 1.6;">
+                            <%= evaluationResult.overall_assessment %>
+                        </p>
+                    </div>
+                <% } %>
+            </div>
+
+        <% } else { %>
+            <div class="evaluation-card">
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #f39c12; margin-bottom: 1rem;"></i>
+                    <h3>No Evaluation Result Found</h3>
+                    <p>The evaluation result for this schedule could not be found.</p>
+                    <a href="/CIT_Faculty_copus_result" class="back-btn">
+                        <i class="bi bi-arrow-left"></i>
+                        Back to Results
+                    </a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const User = require('../model/employee'); // Corrected import to 'employee'
 const Schedule = require('../model/schedule');
+const ObserverSchedule = require('../model/observerSchedule');
 const CopusObservation = require('../model/copusObservation');
+const CopusResult = require('../model/copusResult');
 const Log = require('../model/log');
 const FacultySchedule = require('../model/facultySchedule');
 
@@ -160,35 +162,69 @@ const citFacultyController = {
                 return res.redirect('/login');
             }
 
-            const facultySchedules = await Schedule.find({
-                faculty_user_id: user._id, // Use faculty_user_id for schedules where this user is the observed faculty
-                status: { $in: ['scheduled', 'approved', 'completed'] }
+            console.log(`\n=== FACULTY DASHBOARD DEBUG ===`);
+            console.log(`Logged-in user: ${user.firstname} ${user.lastname} (ID: ${user._id})`);
+            console.log(`Employee ID: ${user.employeeId}, Role: ${user.role}`);
+
+            // Get observation schedules for this faculty member from ObserverSchedule collection
+            const observationSchedules = await ObserverSchedule.find({
+                faculty_user_id: user._id // Observation schedules where this user is being observed
             })
-            .populate('observers.observer_id', 'firstname lastname')
+            .populate('observer_id', 'firstname lastname')
             .lean();
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            console.log(`Found ${observationSchedules.length} observation schedules for faculty ${user.firstname} ${user.lastname}`);
+            observationSchedules.forEach((schedule, index) => {
+                console.log(`  Schedule ${index + 1}:`);
+                console.log(`    - Faculty ID in schedule: ${schedule.faculty_user_id}`);
+                console.log(`    - Observer: ${schedule.observer_id ? schedule.observer_id.firstname + ' ' + schedule.observer_id.lastname : 'N/A'}`);
+                console.log(`    - Type: ${schedule.copus_type}`);
+                console.log(`    - Date: ${schedule.date}`);
+                console.log(`    - Status: ${schedule.status}`);
+            });
 
-            const availableSchedules = await Schedule.find({
-                status: 'pending',
-                faculty_user_id: { $in: [null, undefined] }, // Schedules not yet assigned to an observed faculty.
-                date: { $gte: today }
-            }).lean();
+            // Get faculty's own teaching schedules (available slots)
+            const facultySchedules = await Schedule.find({
+                faculty_user_id: user._id // Faculty's teaching schedules
+            })
+            .lean();
 
-            const calendarEvents = facultySchedules.map(schedule => {
-                const title = `${schedule.copus_type || 'Observation'} - ${schedule.faculty_subject_name || schedule.subject_name || 'N/A'}`;
+            console.log(`Found ${facultySchedules.length} teaching schedules for faculty ${user.firstname} ${user.lastname}`);
+
+            // Create calendar events for observations
+            const observationEvents = observationSchedules.map((schedule, index) => {
+                if (!schedule.date || isNaN(new Date(schedule.date))) {
+                    console.log(`Skipping observation ${index + 1} with invalid date:`, schedule._id);
+                    return null;
+                }
+
+                const observerName = schedule.observer_id ? 
+                    `${schedule.observer_id.firstname} ${schedule.observer_id.lastname}` : 
+                    schedule.observer_name || 'Observer';
+
+                const title = `${schedule.copus_type} - ${observerName}`;
                 const startDateTime = `${schedule.date.toISOString().split('T')[0]}T${schedule.start_time}`;
                 const endDateTime = `${schedule.date.toISOString().split('T')[0]}T${schedule.end_time}`;
 
-                let eventColor = '#3788d8';
+                let eventColor = '#3498db'; // Default scheduled color (blue)
+                let className = 'fc-event-scheduled';
+                
                 if (schedule.status === 'completed') {
-                    eventColor = '#28a745';
-                } else if (schedule.status === 'approved') {
-                    eventColor = '#ffc107';
+                    eventColor = '#2ecc71'; // Green for completed
+                    className = 'fc-event-completed';
                 } else if (schedule.status === 'cancelled') {
-                    eventColor = '#dc3545';
+                    eventColor = '#e74c3c'; // Red for cancelled
+                    className = 'fc-event-cancelled';
+                } else if (schedule.status === 'in_progress') {
+                    eventColor = '#f39c12'; // Orange for in progress  
+                    className = 'fc-event-in-progress';
                 }
+
+                console.log(`  Creating calendar event ${index + 1}:`);
+                console.log(`    - Title: ${title}`);
+                console.log(`    - Start: ${startDateTime}`);
+                console.log(`    - End: ${endDateTime}`);
+                console.log(`    - Color: ${eventColor}`);
 
                 return {
                     id: schedule._id.toString(),
@@ -196,33 +232,62 @@ const citFacultyController = {
                     start: startDateTime,
                     end: endDateTime,
                     color: eventColor,
+                    className: className,
                     extendedProps: {
-                        modality: schedule.modality,
-                        room: schedule.faculty_room || 'N/A',
-                        observer: schedule.observers.map(o => o.observer_id ? `${o.observer_id.firstname} ${o.observer_id.lastname}` : 'N/A').join(', '),
+                        type: 'observation',
+                        observerName: observerName,
+                        copusType: schedule.copus_type,
                         status: schedule.status,
-                        copusType: schedule.copus_type
+                        room: schedule.room
                     }
                 };
-            });
+            }).filter(event => event !== null);
 
-            const availableDates = new Set(availableSchedules.map(sch => sch.date.toISOString().split('T')[0]));
+            // Create calendar events for available teaching slots
+            const availableSlotEvents = facultySchedules.map(schedule => {
+                if (!schedule.date || isNaN(new Date(schedule.date))) {
+                    console.log('Skipping teaching schedule with invalid date:', schedule._id);
+                    return null;
+                }
 
-            availableDates.forEach(dateString => {
-                calendarEvents.push({
-                    id: `available-${dateString}`,
-                    title: 'Available Slot(s)',
-                    start: dateString,
-                    display: 'background',
-                    color: '#add8e6'
-                });
-            });
+                const title = `Available Slot - ${schedule.day_of_week}`;
+                const startDateTime = `${schedule.date.toISOString().split('T')[0]}T${schedule.start_time || '08:00'}`;
+                const endDateTime = `${schedule.date.toISOString().split('T')[0]}T${schedule.end_time || '10:00'}`;
+
+                return {
+                    id: `teaching_${schedule._id.toString()}`,
+                    title: title,
+                    start: startDateTime,
+                    end: endDateTime,
+                    color: '#27ae60', // Green for available slots
+                    className: 'fc-event-available',
+                    display: 'background', // Show as background event
+                    extendedProps: {
+                        type: 'available_slot',
+                        room: schedule.faculty_room,
+                        status: 'available'
+                    }
+                };
+            }).filter(event => event !== null);
+
+            // Combine all calendar events
+            const calendarEvents = [...observationEvents, ...availableSlotEvents];
+            
+            console.log(`Faculty Dashboard: Generated ${calendarEvents.length} calendar events for ${user.firstname} ${user.lastname}`);
+            console.log('Sample events:', calendarEvents.slice(0, 2));
+
+            // Add detailed debugging for calendar events
+            console.log('=== FACULTY DASHBOARD DEBUG ===');
+            console.log('User:', user.firstname, user.lastname, user._id);
+            console.log('Total calendar events:', calendarEvents.length);
+            console.log('Calendar events JSON:', JSON.stringify(calendarEvents, null, 2));
+            console.log('=== END DEBUG ===');
 
             res.render('CIT_Faculty/dashboard', {
                 firstName: user.firstname,
                 lastName: user.lastname,
                 employeeId: user.employeeId,
-                calendarEvents: JSON.stringify(calendarEvents),
+                calendarEvents: JSON.stringify(calendarEvents), // Pass as JSON string for the template
                 error_msg: req.flash('error_msg'),
                 success_msg: req.flash('success_msg')
             });
@@ -245,6 +310,18 @@ const citFacultyController = {
             }
             console.log(`Logged-in Faculty: ${user.firstname} ${user.lastname} (ID: ${user._id})`);
 
+            // Get completed observation schedules for this faculty
+            const completedObservationSchedules = await ObserverSchedule.find({
+                faculty_user_id: user._id,
+                status: 'completed'
+            })
+            .populate('observer_id', 'firstname lastname')
+            .sort({ date: -1, start_time: -1 })
+            .lean();
+
+            console.log(`Step 1: Found ${completedObservationSchedules.length} completed observation schedules.`);
+
+            // Also get old completed schedules for backward compatibility
             const rawCompletedSchedules = await Schedule.find({
                 faculty_user_id: user._id,
                 status: 'completed'
@@ -254,8 +331,98 @@ const citFacultyController = {
             .sort({ date: -1, start_time: -1 })
             .lean();
 
-            console.log(`Step 1: Found ${rawCompletedSchedules.length} raw completed schedules.`);
-            if (rawCompletedSchedules.length === 0) {
+            console.log(`Step 2: Found ${rawCompletedSchedules.length} old completed schedules.`);
+
+            // Get COPUS evaluation results for this faculty
+            const copusResults = await CopusResult.find({
+                faculty_id: user._id
+            })
+            .populate('observer_id', 'firstname lastname')
+            .populate('schedule_id')
+            .sort({ evaluation_date: -1 })
+            .lean();
+
+            console.log(`Step 3: Found ${copusResults.length} COPUS evaluation results.`);
+
+            // Format new observation schedules with evaluation results
+            const formattedObservationSchedules = await Promise.all(
+                completedObservationSchedules.map(async schedule => {
+                    // Find corresponding evaluation result
+                    const evaluationResult = copusResults.find(result => 
+                        result.schedule_id && result.schedule_id.toString() === schedule._id.toString()
+                    );
+
+                    const observerName = schedule.observer_id ? 
+                        `${schedule.observer_id.firstname} ${schedule.observer_id.lastname}` : 'N/A';
+
+                    return {
+                        _id: schedule._id,
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                        employeeId: user.employeeId,
+                        department: user.department,
+                        date: schedule.date,
+                        start_time: schedule.start_time,
+                        end_time: schedule.end_time,
+                        year_level: schedule.year_level || 'N/A',
+                        semester: schedule.semester || 'N/A',
+                        subject_code: schedule.subject_code || 'N/A',
+                        subject: schedule.subject_name || 'N/A',
+                        modality: schedule.modality || 'N/A',
+                        copus: schedule.copus_type || 'N/A',
+                        observer: observerName,
+                        room: schedule.room || 'N/A',
+                        hasEvaluation: !!evaluationResult,
+                        evaluationResult: evaluationResult ? {
+                            final_score: evaluationResult.final_score,
+                            final_rating: evaluationResult.final_rating,
+                            student_engagement_score: evaluationResult.student_engagement_score,
+                            teacher_facilitation_score: evaluationResult.teacher_facilitation_score,
+                            learning_environment_score: evaluationResult.learning_environment_score,
+                            overall_assessment: evaluationResult.overall_assessment,
+                            evaluation_date: evaluationResult.evaluation_date
+                        } : null
+                    };
+                })
+            );
+
+            // Format old schedules for backward compatibility
+            const formattedOldSchedules = rawCompletedSchedules.map(schedule => {
+                const facultyDetails = schedule.faculty_user_id;
+                const observerNames = schedule.observers
+                    .map(obs => obs.observer_id ? `${obs.observer_id.firstname} ${obs.observer_id.lastname}` : 'N/A')
+                    .filter(name => name !== 'N/A')
+                    .join(', ');
+
+                return {
+                    _id: schedule._id,
+                    firstname: schedule.faculty_firstname || (facultyDetails ? facultyDetails.firstname : user.firstname),
+                    lastname: schedule.faculty_lastname || (facultyDetails ? facultyDetails.lastname : user.lastname),
+                    employeeId: schedule.faculty_employee_id || (facultyDetails ? facultyDetails.employeeId : user.employeeId),
+                    department: schedule.faculty_department || (facultyDetails ? facultyDetails.department : user.department),
+                    date: schedule.date,
+                    start_time: schedule.start_time,
+                    end_time: schedule.end_time,
+                    year_level: schedule.year_level,
+                    semester: schedule.semester,
+                    subject_code: schedule.faculty_subject_code || schedule.subject_code || 'N/A',
+                    subject: schedule.faculty_subject_name || schedule.subject_name || 'N/A',
+                    modality: schedule.modality || 'N/A',
+                    copus: schedule.copus_type || 'N/A',
+                    observer: observerNames || 'N/A',
+                    hasEvaluation: false,
+                    evaluationResult: null,
+                    isOldFormat: true
+                };
+            });
+
+            // Combine both types of schedules
+            const allCompletedSchedules = [...formattedObservationSchedules, ...formattedOldSchedules];
+
+            console.log(`Step 4: Total formatted schedules prepared: ${allCompletedSchedules.length}`);
+            console.log('--- END: getCopusResultList for Faculty ---');
+
+            if (allCompletedSchedules.length === 0) {
                 console.log('No completed schedules found for this faculty user. Rendering empty list.');
                 return res.render('CIT_Faculty/copus_result', {
                     firstName: user.firstname,
@@ -267,52 +434,11 @@ const citFacultyController = {
                 });
             }
 
-            const formattedCompletedSchedules = rawCompletedSchedules.map(schedule => {
-                const facultyDetails = schedule.faculty_user_id;
-
-                if (!facultyDetails) {
-                    console.warn(`Warning: schedule.faculty_user_id not populated for schedule ID: ${schedule._id}. Using logged-in user details.`);
-                }
-                if (!schedule.observers || schedule.observers.length === 0) {
-                    console.warn(`Warning: No observers found for schedule ID: ${schedule._id}.`);
-                }
-
-                const observerNames = schedule.observers
-                    .map(obs => obs.observer_id ? `${obs.observer_id.firstname} ${obs.observer_id.lastname}` : 'N/A')
-                    .filter(name => name !== 'N/A')
-                    .join(', ');
-
-                const formattedSchedule = {
-                    _id: schedule._id,
-                    firstname: schedule.faculty_firstname || (facultyDetails ? facultyDetails.firstname : user.firstname),
-                    lastname: schedule.faculty_lastname || (facultyDetails ? facultyDetails.lastname : user.lastname),
-                    employeeId: schedule.faculty_employee_id || (facultyDetails ? facultyDetails.employeeId : user.employeeId),
-                    department: schedule.faculty_department || (facultyDetails ? facultyDetails.department : user.department),
-
-                    date: schedule.date,
-                    start_time: schedule.start_time,
-                    end_time: schedule.end_time,
-                    year_level: schedule.year_level,
-                    semester: schedule.semester,
-                    subject_code: schedule.faculty_subject_code || schedule.subject_code || 'N/A',
-                    subject: schedule.faculty_subject_name || schedule.subject_name || 'N/A',
-                    modality: schedule.modality || 'N/A',
-                    copus: schedule.copus_type || 'N/A',
-
-                    observer: observerNames || 'N/A',
-                };
-                console.log(`Step 2: Formatted Schedule ID ${formattedSchedule._id}:`, formattedSchedule);
-                return formattedSchedule;
-            });
-
-            console.log(`Step 3: Total formatted schedules prepared: ${formattedCompletedSchedules.length}`);
-            console.log('--- END: getCopusResultList for Faculty ---');
-
             res.render('CIT_Faculty/copus_result', {
                 firstName: user.firstname,
                 lastName: user.lastname,
                 employeeId: user.employeeId,
-                completedSchedules: formattedCompletedSchedules,
+                completedSchedules: allCompletedSchedules,
                 error_msg: req.flash('error_msg'),
                 success_msg: req.flash('success_msg')
             });
@@ -639,75 +765,35 @@ const citFacultyController = {
         }
     },
 
-    // GET /CIT_Faculty_copus_history
+    // GET /CIT_Faculty_copus_history - Display history and evaluation results (SIMPLIFIED)
     getCopusHistory: async (req, res) => {
         try {
-            const facultyUser = await User.findById(req.session.user.id).lean();
-            if (!facultyUser || facultyUser.role !== 'Faculty') {
-                console.warn('User not found or unauthorized for CIT Faculty COPUS history. Redirecting to login.');
-                req.flash('error_msg', 'Unauthorized access.');
+            const user = await User.findById(req.session.user.id);
+            if (!user) {
                 return res.redirect('/login');
             }
 
-            const rawHistorySchedules = await Schedule.find({
-                faculty_user_id: facultyUser._id,
-                status: { $in: ['completed', 'cancelled'] }
+            // Simply fetch all COPUS results for this faculty from copusresults collection
+            const copusResults = await CopusResult.find({
+                faculty_id: user._id
             })
-            .populate('observers.observer_id', 'firstname lastname')
-            .sort({ date: -1, start_time: -1 })
+            .sort({ evaluation_date: -1 })
             .lean();
 
-            const transformedHistorySchedules = await Promise.all(rawHistorySchedules.map(async (schedule) => {
-                const facultyName = `${schedule.faculty_firstname || 'N/A'} ${schedule.faculty_lastname || 'N/A'}`;
-                const facultyDepartment = schedule.faculty_department || 'N/A';
-                const subjectCode = schedule.faculty_subject_code || 'N/A';
-                const subjectName = schedule.faculty_subject_name || 'N/A';
-                const copusType = schedule.copus_type || 'N/A';
-                const room = schedule.faculty_room || 'N/A';
-
-                const observerNames = schedule.observers
-                    .map(obs => (obs.observer_id ? `${obs.observer_id.firstname} ${obs.observer_id.lastname}` : 'N/A'))
-                    .join(', ');
-
-                const copusObservations = await CopusObservation.find({ scheduleId: schedule._id })
-                    .populate('observerId', 'firstname lastname')
-                    .sort({ copusNumber: 1 })
-                    .lean();
-
-                return {
-                    _id: schedule._id,
-                    fullname: facultyName,
-                    firstname: schedule.faculty_firstname,
-                    lastname: schedule.faculty_lastname,
-                    department: facultyDepartment,
-                    date: schedule.date,
-                    start_time: schedule.start_time,
-                    end_time: schedule.end_time,
-                    year_level: schedule.year_level,
-                    school_year: schedule.school_year,
-                    semester: schedule.semester,
-                    subject_code: subjectCode,
-                    subject: subjectName,
-                    observer: observerNames,
-                    modality: schedule.modality,
-                    copus: copusType,
-                    status: schedule.status,
-                    copusObservations: copusObservations,
-                };
-            }));
+            console.log(`Found ${copusResults.length} COPUS results for ${user.firstname} ${user.lastname}`);
 
             res.render('CIT_Faculty/copus_history', {
-                firstName: facultyUser.firstname,
-                lastName: facultyUser.lastname,
-                employeeId: facultyUser.employeeId,
-                completedSchedules: transformedHistorySchedules,
+                firstName: user.firstname,
+                lastName: user.lastname,
+                employeeId: user.employeeId,
+                copusResults: copusResults,
                 error_msg: req.flash('error_msg'),
                 success_msg: req.flash('success_msg')
             });
 
         } catch (err) {
-            console.error('Error fetching completed COPUS history for CIT Faculty:', err);
-            req.flash('error_msg', 'Failed to load COPUS History view.');
+            console.error('Error fetching COPUS history:', err);
+            req.flash('error_msg', 'Failed to load COPUS History.');
             res.status(500).redirect('/CIT_Faculty_dashboard');
         }
     },
@@ -735,111 +821,6 @@ const citFacultyController = {
         }
     },
 
-    // GET /CIT_Faculty_available_schedule - Enhanced for new workflow
-    getAvailableSchedules: async (req, res) => {
-        try {
-            const facultyUser = await User.findById(req.session.user.id);
-            if (!facultyUser) {
-                return res.redirect('/login');
-            }
-
-            // Get observation slots created by ALC that are available for faculty selection
-            const availableSchedules = await Schedule.find({
-                schedule_type: 'observation_slot',
-                status: 'available_for_selection',
-                faculty_user_id: null // Not yet assigned to any faculty
-            })
-            .populate('observers.observer_id', 'firstname lastname role')
-            .populate('created_by_user_id', 'firstname lastname')
-            .sort({ date: 1, start_time: 1 })
-            .lean();
-
-            res.render('CIT_Faculty/available_schedule', {
-                availableSchedules,
-                firstName: facultyUser.firstname,
-                lastName: facultyUser.lastname,
-                employeeId: facultyUser.employeeId,
-                department: facultyUser.department,
-                success_msg: req.flash('success'),
-                error_msg: req.flash('error')
-            });
-
-        } catch (err) {
-            console.error('Error fetching available schedules:', err);
-            res.status(500).redirect('/CIT_Faculty_dashboard');
-        }
-    },
-
-    // POST /faculty_select_schedule_slot
-    selectScheduleSlot: async (req, res) => {
-        try {
-            const facultyUser = await User.findById(req.session.user.id);
-            if (!facultyUser) {
-                return res.redirect('/login');
-            }
-
-            const {
-                scheduleId,
-                subjectCode,
-                subjectName,
-                room
-            } = req.body;
-
-            const schedule = await Schedule.findById(scheduleId);
-            if (!schedule) {
-                req.flash('error', 'Schedule not found.');
-                return res.redirect('/CIT_Faculty_available_schedule');
-            }
-
-            // Verify schedule is available for selection
-            if (schedule.schedule_type !== 'observation_slot' || schedule.status !== 'available_for_selection') {
-                req.flash('error', 'This schedule slot is no longer available.');
-                return res.redirect('/CIT_Faculty_available_schedule');
-            }
-
-            // Update schedule with faculty selection
-            schedule.faculty_user_id = facultyUser._id;
-            schedule.faculty_employee_id = facultyUser.employeeId;
-            schedule.faculty_firstname = facultyUser.firstname;
-            schedule.faculty_lastname = facultyUser.lastname;
-            schedule.faculty_department = facultyUser.department;
-            schedule.faculty_subject_code = subjectCode;
-            schedule.faculty_subject_name = subjectName;
-            schedule.faculty_room = room;
-            schedule.schedule_type = 'faculty_selected';
-            schedule.status = 'scheduled'; // Now scheduled for observation
-
-            await schedule.save();
-
-            // Create notifications for assigned observers
-            for (const observer of schedule.observers) {
-                await Notification.create({
-                    userId: observer.observer_id,
-                    title: 'New Faculty Schedule Selected',
-                    message: `${facultyUser.firstname} ${facultyUser.lastname} has selected a schedule slot for observation on ${new Date(schedule.date).toLocaleDateString()}.`,
-                    type: 'schedule_selection',
-                    relatedId: schedule._id
-                });
-            }
-
-            // Log the action
-            await Log.create({
-                action: 'Faculty Schedule Selection',
-                performedBy: facultyUser._id,
-                performedByRole: facultyUser.role,
-                details: `Faculty ${facultyUser.firstname} ${facultyUser.lastname} selected observation slot for ${new Date(schedule.date).toLocaleDateString()} at ${schedule.start_time}`
-            });
-
-            req.flash('success', 'Schedule slot selected successfully! Observers have been notified.');
-            res.redirect('/CIT_Faculty_schedule_management');
-
-        } catch (err) {
-            console.error('Error selecting schedule slot:', err);
-            req.flash('error', 'Failed to select schedule slot.');
-            res.redirect('/CIT_Faculty_available_schedule');
-        }
-    },
-
     getFacultySchedules: async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -850,7 +831,9 @@ const citFacultyController = {
             return res.redirect('/login');
         }
 
-        // Fetch schedules for the logged-in faculty member
+        console.log(`Fetching schedules for faculty: ${facultyUser.firstname} ${facultyUser.lastname} (ID: ${userId})`);
+
+        // Fetch schedules for the logged-in faculty member from the Schedule model
         const schedules = await Schedule.find({
             faculty_user_id: userId
         })
@@ -858,6 +841,8 @@ const citFacultyController = {
         .sort({
             createdAt: -1
         });
+
+        console.log(`Found ${schedules.length} schedules for faculty member`);
 
         // The variables are correctly defined and passed to the view
         res.render('CIT_Faculty/schedule_management', {
@@ -884,7 +869,155 @@ const citFacultyController = {
     }
 },
 
-    
+    // GET /CIT_Faculty_available_schedule - Display available schedule slots for faculty
+    getAvailableSchedule: async (req, res) => {
+        try {
+            const user = await User.findById(req.session.user.id);
+            if (!user) {
+                return res.redirect('/login');
+            }
+
+            console.log(`\n=== FACULTY AVAILABLE SCHEDULE ===`);
+            console.log(`Faculty: ${user.firstname} ${user.lastname} (ID: ${user._id})`);
+
+            // Get available schedules for this faculty
+            const availableSchedules = await ObserverSchedule.find({
+                faculty_user_id: user._id,
+                status: { $in: ['pending', 'confirmed'] }
+            })
+            .populate('observer_id', 'firstname lastname')
+            .sort({ date: 1, start_time: 1 })
+            .lean();
+
+            console.log(`Found ${availableSchedules.length} available schedules.`);
+
+            res.render('CIT_Faculty/available_schedule', {
+                firstName: user.firstname,
+                lastName: user.lastname,
+                employeeId: user.employeeId,
+                department: user.department || 'N/A',
+                availableSchedules: availableSchedules,
+                error_msg: req.flash('error_msg'),
+                success_msg: req.flash('success_msg')
+            });
+
+        } catch (err) {
+            console.error('Error fetching available schedules for CIT Faculty:', err);
+            req.flash('error_msg', 'Failed to load Available Schedule view.');
+            res.status(500).redirect('/CIT_Faculty_dashboard');
+        }
+    },
+
+    // GET /CIT_Faculty_evaluation_result/:scheduleId - Display detailed COPUS evaluation result
+    getEvaluationResult: async (req, res) => {
+        console.log('\n--- START: getEvaluationResult for Faculty ---');
+        try {
+            const scheduleId = req.params.scheduleId;
+            const user = await User.findById(req.session.user.id);
+            
+            if (!user) {
+                console.log('Error: User not found in session. Redirecting to login.');
+                return res.redirect('/login');
+            }
+
+            console.log(`Getting evaluation result for schedule ${scheduleId} for faculty: ${user.firstname} ${user.lastname}`);
+
+            // Find the evaluation result for this schedule
+            const evaluationResult = await CopusResult.findOne({
+                schedule_id: scheduleId,
+                faculty_id: user._id
+            })
+            .populate('observer_id', 'firstname lastname')
+            .populate('schedule_id')
+            .lean();
+
+            if (!evaluationResult) {
+                req.flash('error_msg', 'No evaluation result found for this schedule.');
+                return res.redirect('/CIT_Faculty_copus_result');
+            }
+
+            // Get the observer schedule details
+            const observerSchedule = await ObserverSchedule.findById(scheduleId)
+                .populate('observer_id', 'firstname lastname')
+                .lean();
+
+            console.log('Evaluation result found:', {
+                final_score: evaluationResult.final_score,
+                final_rating: evaluationResult.final_rating,
+                evaluation_date: evaluationResult.evaluation_date
+            });
+
+            res.render('CIT_Faculty/evaluation_result', {
+                firstName: user.firstname,
+                lastName: user.lastname,
+                employeeId: user.employeeId,
+                evaluationResult: evaluationResult,
+                observerSchedule: observerSchedule,
+                error_msg: req.flash('error_msg'),
+                success_msg: req.flash('success_msg')
+            });
+
+        } catch (err) {
+            console.error('CRITICAL ERROR in getEvaluationResult:', err);
+            req.flash('error_msg', 'An unexpected error occurred while loading the evaluation result.');
+            res.status(500).redirect('/CIT_Faculty_copus_result');
+        }
+    },
+
+    // GET /CIT_Faculty_evaluation_details/:id - Get detailed evaluation information for modal
+    getEvaluationDetails: async (req, res) => {
+        try {
+            const user = await User.findById(req.session.user.id);
+            if (!user || user.role !== 'Faculty') {
+                return res.status(401).json({ success: false, message: 'Unauthorized access.' });
+            }
+
+            const evaluationId = req.params.id;
+            
+            // Find the evaluation result
+            const evaluation = await CopusResult.findOne({
+                _id: evaluationId,
+                faculty_id: user._id
+            })
+            .populate('observer_id', 'firstname lastname')
+            .populate('schedule_id')
+            .lean();
+
+            if (!evaluation) {
+                return res.status(404).json({ success: false, message: 'Evaluation not found.' });
+            }
+
+            // Format the response data
+            const responseData = {
+                _id: evaluation._id,
+                observationDate: evaluation.evaluation_date,
+                observerName: evaluation.observer_id ? 
+                    `${evaluation.observer_id.firstname} ${evaluation.observer_id.lastname}` : 'Unknown',
+                subjectName: evaluation.subject_name || 'N/A',
+                yearLevel: evaluation.year_level || 'N/A',
+                semester: evaluation.semester || 'N/A',
+                observationDuration: evaluation.observation_duration || 'N/A',
+                studentEngagementScore: evaluation.student_engagement_score || 0,
+                teacherFacilitationScore: evaluation.teacher_facilitation_score || 0,
+                learningEnvironmentScore: evaluation.learning_environment_score || 0,
+                overallScore: evaluation.final_score || 0,
+                rating: evaluation.final_rating || 'N/A',
+                observations: evaluation.additional_notes || evaluation.comments || null
+            };
+
+            res.json({ 
+                success: true, 
+                evaluation: responseData 
+            });
+
+        } catch (err) {
+            console.error('Error fetching evaluation details:', err);
+            res.status(500).json({ 
+                success: false, 
+                message: 'An error occurred while loading evaluation details.' 
+            });
+        }
+    },
 
 };
 

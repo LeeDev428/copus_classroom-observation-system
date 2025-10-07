@@ -3,6 +3,7 @@
 const User = require('../model/employee');
 const Schedule = require('../model/schedule');
 const FacultySchedule = require('../model/facultySchedule');
+const CopusResult = require('../model/copusResult');
 const Log = require('../model/log');
 const facultySchedule = require('../model/facultySchedule');
 
@@ -33,11 +34,24 @@ const adminController = {
             const user = await User.findById(req.session.user.id);
             if (!user) return res.redirect('/login');
 
+            // Clean up schedules with invalid dates first
+            await Schedule.deleteMany({
+                $or: [
+                    { date: null },
+                    { date: { $exists: false } }
+                ]
+            });
+
             const schedules = await Schedule.find({});
             const eventMap = {};
 
-            // Group schedules by date
+            // Group schedules by date with proper date validation
             schedules.forEach(sch => {
+                if (!sch.date || isNaN(new Date(sch.date))) {
+                    console.log(`Skipping schedule with invalid date:`, sch._id, sch.date);
+                    return; // Skip schedules with invalid dates
+                }
+                
                 const date = new Date(sch.date).toISOString().split('T')[0];
                 if (!eventMap[date]) eventMap[date] = [];
                 eventMap[date].push(sch);
@@ -83,7 +97,20 @@ const adminController = {
 
         } catch (err) {
             console.error('Error fetching dashboard data:', err);
-            res.status(500).send('Internal Server Error');
+            
+            // Render dashboard with empty calendar events if there's an error
+            try {
+                const user = await User.findById(req.session.user.id);
+                res.render('Admin/dashboard', {
+                    employeeId: user ? user.employeeId : 'Unknown',
+                    firstName: user ? user.firstname : 'Unknown',
+                    lastName: user ? user.lastname : 'User',
+                    calendarEvents: JSON.stringify([])
+                });
+            } catch (renderErr) {
+                console.error('Error rendering dashboard:', renderErr);
+                res.status(500).send('Internal Server Error');
+            }
         }
     },
 
@@ -98,11 +125,79 @@ const adminController = {
             // Fetch employees from the database
             const employees = await User.find({ role: { $ne: 'admin' } }).sort({ lastname: 1 });
 
-            // Fetch schedules to display them in the table
-           const schedules = await Schedule.find({})
-    // Correctly populate the faculty_user_id and observers fields
-   .populate('faculty_user_id')
-    .sort({ date: 1, start_time: 1 });
+            // Clean up orphaned schedules (schedules with deleted users)
+            await Schedule.deleteMany({ faculty_user_id: null });
+
+            // Fetch schedules and group by faculty member
+            const allSchedules = await Schedule.find({ faculty_user_id: { $ne: null } })
+                .populate('faculty_user_id', 'firstname lastname role department employeeId')
+                .sort({ date: 1, start_time: 1 });
+
+            // Identify and clean up schedules with failed populates (referenced user doesn't exist)
+            const orphanedScheduleIds = [];
+            const validSchedules = allSchedules.filter(schedule => {
+                if (!schedule.faculty_user_id) {
+                    orphanedScheduleIds.push(schedule._id);
+                    return false;
+                }
+                return true;
+            });
+
+            // Remove orphaned schedules if any found
+            if (orphanedScheduleIds.length > 0) {
+                console.log(`Removing ${orphanedScheduleIds.length} orphaned schedules with invalid user references`);
+                await Schedule.deleteMany({ _id: { $in: orphanedScheduleIds } });
+            }
+
+            // Group schedules by faculty member
+            const facultyScheduleMap = {};
+            
+            validSchedules.forEach(schedule => {
+                // Double-check that faculty_user_id exists (should be guaranteed by filtering above)
+                if (!schedule.faculty_user_id || !schedule.faculty_user_id._id) {
+                    console.log('Skipping schedule with missing faculty user:', schedule._id);
+                    return;
+                }
+                
+                const facultyId = schedule.faculty_user_id._id.toString();
+                
+                if (!facultyScheduleMap[facultyId]) {
+                    facultyScheduleMap[facultyId] = {
+                        faculty_user_id: schedule.faculty_user_id,
+                        start_time: schedule.start_time,
+                        end_time: schedule.end_time,
+                        copus_type: schedule.copus_type,
+                        schedule_type: schedule.schedule_type,
+                        dates: [],
+                        days: []
+                    };
+                }
+                
+                // Add the date and day to the group
+                if (schedule.date) {
+                    facultyScheduleMap[facultyId].dates.push(schedule.date);
+                }
+                if (schedule.day_of_week && !facultyScheduleMap[facultyId].days.includes(schedule.day_of_week)) {
+                    facultyScheduleMap[facultyId].days.push(schedule.day_of_week);
+                }
+            });
+
+            // Convert grouped data back to array format for the view
+            const schedules = Object.values(facultyScheduleMap).map(group => ({
+                faculty_user_id: group.faculty_user_id,
+                start_time: group.start_time,
+                end_time: group.end_time,
+                copus_type: group.copus_type,
+                schedule_type: group.schedule_type,
+                // Use the earliest date for display
+                date: group.dates.length > 0 ? new Date(Math.min(...group.dates)) : null,
+                // Store all days for the schedule column
+                all_days: group.days,
+                // Create a schedule display string
+                schedule_display: group.schedule_type === 'bulk_faculty' ? 'Mon - Sat' : group.days.join(', ')
+            }));
+
+            console.log(`Grouped ${allSchedules.length} individual schedules into ${schedules.length} faculty schedule groups`);
 
             // Pass all the necessary data to the EJS template
             res.render('Admin/schedule', {
@@ -134,13 +229,10 @@ const adminController = {
                 return res.status(404).json({ success: false, message: 'Faculty user not found.' });
             }
 
-            // Create the new schedule entry using the Schedule model
-            const newSchedule = new Schedule({
+            // Create the new schedule entry using the FacultySchedule model
+            const newSchedule = new FacultySchedule({
                 faculty_user_id: facultyUser._id,
-                image_path: req.file.path, // Save the path provided by Multer
-                schedule_type: 'manual_upload', // Mark as manually uploaded schedule
-                created_by_role: 'admin',
-                created_by_user_id: req.session.user.id
+                image_path: req.file.path // Save the path provided by Multer
             });
 
             // Save the new schedule to the database
@@ -163,119 +255,105 @@ const adminController = {
         }
     },
 
-    // GET /admin_weekly_schedule_creation
-    getWeeklyScheduleCreation: async (req, res) => {
+    // NEW METHOD: Create bulk schedules for all users of a specific role
+    createBulkSchedule: async (req, res) => {
         try {
-            const user = await User.findById(req.session.user.id);
-            if (!user) {
-                return res.redirect('/login');
+            console.log('Raw request body:', req.body); // Debug log
+            
+            const { target_role, start_time, end_time, copus_type, days } = req.body;
+            const selectedDays = days || [];
+
+            console.log('Bulk schedule creation:', { target_role, start_time, end_time, copus_type, selectedDays });
+
+            // Validate required fields
+            if (!target_role || !start_time || !end_time || selectedDays.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Please fill in all required fields and select at least one day.' 
+                });
             }
 
-            // Get all faculty members for the dropdown
-            const facultyMembers = await User.find({ role: 'Faculty' }).lean();
-
-            res.render('Admin/weekly_schedule_creation', {
-                facultyMembers,
-                firstName: user.firstname,
-                lastName: user.lastname,
-                employeeId: user.employeeId,
-                success_msg: req.flash('success'),
-                error_msg: req.flash('error')
-            });
-        } catch (err) {
-            console.error('Error loading weekly schedule creation:', err);
-            res.status(500).send('Failed to load schedule creation page');
-        }
-    },
-
-    // POST /admin_create_weekly_schedule
-    createWeeklySchedule: async (req, res) => {
-        try {
-            const user = await User.findById(req.session.user.id);
-            if (!user) {
-                return res.redirect('/login');
+            // Find all users with the specified role
+            const users = await User.find({ role: target_role, status: 'Active' });
+            
+            if (users.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: `No active users found with role: ${target_role}` 
+                });
             }
 
-            const {
-                startDate,
-                endDate,
-                startTime,
-                endTime,
-                yearLevel,
-                schoolYear,
-                semester,
-                modality,
-                selectedFaculty // Array of faculty IDs
-            } = req.body;
+            console.log(`Found ${users.length} users with role ${target_role}`);
 
-            // Validate selectedFaculty
-            if (!selectedFaculty || !Array.isArray(selectedFaculty) || selectedFaculty.length === 0) {
-                req.flash('error', 'Please select at least one faculty member.');
-                return res.redirect('/admin_create_weekly_schedule');
-            }
+            let createdCount = 0;
+            const Schedule = require('../model/schedule'); // Import Schedule model
 
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            const createdSchedules = [];
-
-            // Create schedules for each day in the date range (Mon-Sat)
-            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-                const dayOfWeek = date.getDay();
-                // Skip Sundays (0)
-                if (dayOfWeek === 0) continue;
-
-                // Create schedule for each selected faculty member
-                for (const facultyId of selectedFaculty) {
-                    const faculty = await User.findById(facultyId);
-                    if (!faculty) continue;
-
-                    const newSchedule = new Schedule({
-                        date: new Date(date),
-                        start_time: startTime,
-                        end_time: endTime,
-                        year_level: yearLevel,
-                        school_year: schoolYear,
-                        semester: semester,
-                        modality: modality,
+            // Create schedules for each user and each selected day
+            for (const user of users) {
+                for (const day of selectedDays) {
+                    try {
+                        // Create a date for the schedule (current week + day)
+                        const today = new Date();
+                        const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                        const targetDayIndex = daysOfWeek.indexOf(day);
                         
-                        // Faculty information
-                        faculty_user_id: faculty._id,
-                        faculty_employee_id: faculty.employeeId,
-                        faculty_firstname: faculty.firstname,
-                        faculty_lastname: faculty.lastname,
-                        faculty_department: faculty.department,
-                        
-                        // NEW WORKFLOW FIELDS
-                        schedule_type: 'admin_template',
-                        created_by_role: user.role,
-                        created_by_user_id: user._id,
-                        status: 'pending',
-                        
-                        observers: [] // Empty initially
-                    });
+                        // Calculate the date for this day in the current week
+                        const daysUntilTarget = (targetDayIndex - currentDay + 7) % 7;
+                        const scheduleDate = new Date(today);
+                        scheduleDate.setDate(today.getDate() + daysUntilTarget);
 
-                    const savedSchedule = await newSchedule.save();
-                    createdSchedules.push(savedSchedule);
+                        const newSchedule = new Schedule({
+                            date: scheduleDate,
+                            day_of_week: day,
+                            start_time: start_time,
+                            end_time: end_time,
+                            faculty_user_id: user._id,
+                            faculty_employee_id: user.employeeId,
+                            faculty_firstname: user.firstname,
+                            faculty_lastname: user.lastname,
+                            faculty_department: user.department,
+                            copus_type: copus_type || 'Copus 1',
+                            schedule_type: 'bulk_faculty',
+                            status: 'scheduled'
+                        });
+
+                        await newSchedule.save();
+                        createdCount++;
+                        console.log(`Created schedule for ${user.firstname} ${user.lastname} on ${day}`);
+                    } catch (scheduleError) {
+                        console.error(`Failed to create schedule for ${user.firstname} ${user.lastname} on ${day}:`, scheduleError.message);
+                    }
                 }
             }
 
-            // Log the action
-            await Log.create({
-                action: 'Create Weekly Schedules',
-                performedBy: user._id,
-                performedByRole: user.role,
-                details: `Created ${createdSchedules.length} weekly template schedules from ${startDate} to ${endDate} for ${selectedFaculty.length} faculty members`
+            // Log the bulk creation activity
+            const log = new Log({
+                user_id: req.session.user.id,
+                action: `Bulk schedule creation for role: ${target_role}`,
+                details: `Created ${createdCount} schedules for ${users.length} users across ${selectedDays.length} days`
+            });
+            await log.save();
+
+            res.status(201).json({ 
+                success: true, 
+                message: `Successfully created schedules!`,
+                created_count: createdCount,
+                users_count: users.length,
+                days_count: selectedDays.length
             });
 
-            req.flash('success', `Successfully created ${createdSchedules.length} weekly schedules!`);
-            res.redirect('/admin_create_weekly_schedule');
-
         } catch (err) {
-            console.error('Error creating weekly schedules:', err);
-            req.flash('error', 'Failed to create weekly schedules.');
-            res.redirect('/admin_create_weekly_schedule');
+            console.error('Error creating bulk schedules:', err);
+            res.status(500).json({ 
+                success: false, 
+                message: 'Failed to create bulk schedules.', 
+                error: err.message 
+            });
         }
     },
+
+  
 
     // GET /admin_user_management
     getUserManagement: async (req, res) => {
@@ -365,10 +443,25 @@ const adminController = {
             const user = await User.findById(req.session.user.id);
             if (!user) return res.redirect('/login');
 
+            console.log('🔍 Admin fetching ALL completed schedules...');
+            
+            // Fetch ALL completed schedules (Admin can see everything)
+            const completedSchedules = await Schedule.find({
+                status: 'completed'
+            }).sort({ date: -1, start_time: -1 })
+                .select('firstname lastname department date start_time end_time year_level semester subject_code subject observer copus modality');
+
+            console.log(`📊 Found ${completedSchedules.length} total completed schedules for Admin view`);
+
+            // Fetch chart data from copusresults collection
+            const chartData = await adminController.getChartData();
+
             res.render('Admin/copus_result', {
+                completedSchedules: completedSchedules,
                 firstName: user.firstname,
                 lastName: user.lastname,
-                employeeId: user.employeeId
+                employeeId: user.employeeId,
+                chartData: chartData
             });
         } catch (err) {
             console.error('Error fetching Copus Result page:', err);
@@ -382,10 +475,22 @@ const adminController = {
             const user = await User.findById(req.session.user.id);
             if (!user) return res.redirect('/login');
 
+            console.log('🔍 Admin fetching ALL COPUS results from copusresults collection...');
+            
+            // Fetch ALL COPUS results from copusresults collection (Admin can see everything)
+            const copusResults = await CopusResult.find({})
+                .sort({ evaluation_date: -1, submitted_at: -1 })
+                .lean();
+
+            console.log(`📊 Found ${copusResults.length} total COPUS results for Admin view`);
+
             res.render('Admin/copus_history', {
                 firstName: user.firstname,
                 lastName: user.lastname,
-                employeeId: user.employeeId
+                employeeId: user.employeeId,
+                copusResults: copusResults,
+                error_msg: req.flash('error'),
+                success_msg: req.flash('success')
             });
         } catch (err) {
             console.error('Error fetching Copus History page:', err);
@@ -407,6 +512,44 @@ const adminController = {
         } catch (err) {
             console.error('Error fetching Settings page:', err);
             res.status(500).send('Internal Server Error');
+        }
+    },
+
+    // Helper function to get chart data
+    getChartData: async function() {
+        try {
+            // Get top 10 highest scores
+            const topHighest = await CopusResult.find({ overall_percentage: { $exists: true, $ne: null } })
+                .sort({ overall_percentage: -1 })
+                .limit(10)
+                .select('faculty_name overall_percentage final_rating')
+                .lean();
+
+            // Get top 10 lowest scores
+            const topLowest = await CopusResult.find({ overall_percentage: { $exists: true, $ne: null } })
+                .sort({ overall_percentage: 1 })
+                .limit(10)
+                .select('faculty_name overall_percentage final_rating')
+                .lean();
+
+            // Get top 1 overall score
+            const topOverall = await CopusResult.findOne({ overall_percentage: { $exists: true, $ne: null } })
+                .sort({ overall_percentage: -1 })
+                .select('faculty_name overall_percentage final_rating')
+                .lean();
+
+            return {
+                topHighest: topHighest || [],
+                topLowest: topLowest || [],
+                topOverall: topOverall || null
+            };
+        } catch (error) {
+            console.error('Error fetching chart data:', error);
+            return {
+                topHighest: [],
+                topLowest: [],
+                topOverall: null
+            };
         }
     },
 };

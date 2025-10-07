@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>COPUS Results - CIT Faculty</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color-start: #0f2027;
+            --primary-color-end: #203a43;
+            --secondary-color-start: #2c5364;
+            --secondary-color-end: #203a43;
+            --text-light: #e0e0e0;
+            --text-dark: #333;
+            --sidebar-width: 280px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .custom-sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--secondary-color-start), var(--secondary-color-end));
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            padding: 2rem 1rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1001;
+        }
+
+        .custom-sidebar h6 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-sidebar small {
+            color: #bbb;
+        }
+
+        .custom-sidebar hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+
+        .custom-sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .custom-sidebar a:hover,
+        .custom-sidebar a.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .custom-sidebar a i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        .page-title {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            color: #3498db;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #bbb;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .score-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-rating {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-great { color: #2ecc71; }
+        .rating-good { color: #3498db; }
+        .rating-needs-improvement { color: #f39c12; }
+        .rating-unsatisfactory { color: #e74c3c; }
+
+        .view-btn {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .view-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            margin-top: 2rem;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .no-results h3 {
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .no-results p {
+            color: #bbb;
+            font-size: 1.1rem;
+        }
+
+        .alert {
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border: none;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .custom-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="custom-sidebar">
+            <h6>Welcome! <%= firstName %>, <%= lastName %></h6>
+            <small><%= employeeId %></small>
+            <hr>
+            <a href="/CIT_Faculty_dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="/CIT_Faculty_copus_result" class="active"><i class="bi bi-clipboard-data"></i> Copus Result</a>
+            <a href="/CIT_Faculty_copus_history"><i class="bi bi-clock-history"></i> Copus History</a>
+            <a href="/CIT_Faculty_schedule_management"><i class="bi bi-calendar-event-fill"></i>My Schedule</a>
+            <a href="/CIT_Faculty_available_schedule"><i class="bi bi-calendar-plus"></i> Find Schedule Slot</a>
+            <a href="/CIT_Faculty_setting"><i class="bi bi-gear-fill"></i> Account & Profile Settings</a>
+            <hr>
+            <form action="/logout" method="POST">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1 class="page-title">📊 COPUS Results</h1>
+
+            <!-- Flash Messages -->
+            <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= error_msg %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+
+            <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <%= success_msg %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+
+            <% if (completedSchedules && completedSchedules.length > 0) { %>
+                <div class="results-container">
+                    <% completedSchedules.forEach(schedule => { %>
+                        <div class="result-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <%= schedule.copus || 'COPUS Evaluation' %>
+                                </div>
+                                <div class="status-badge <%= schedule.hasEvaluation ? 'status-completed' : 'status-pending' %>">
+                                    <%= schedule.hasEvaluation ? '✅ Evaluated' : '⏳ Pending' %>
+                                </div>
+                            </div>
+
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Observer</span>
+                                    <span class="info-value"><%= schedule.observer %></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date</span>
+                                    <span class="info-value"><%= new Date(schedule.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Time</span>
+                                    <span class="info-value"><%= schedule.start_time %> - <%= schedule.end_time %></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Subject</span>
+                                    <span class="info-value"><%= schedule.subject %></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Year Level</span>
+                                    <span class="info-value"><%= schedule.year_level || 'N/A' %></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Semester</span>
+                                    <span class="info-value"><%= schedule.semester || 'N/A' %></span>
+                                </div>
+                            </div>
+
+                            <!-- Show evaluation results if available -->
+                            <% if (schedule.hasEvaluation && schedule.evaluationResult) { %>
+                                <div class="score-display">
+                                    <div class="score-number"><%= schedule.evaluationResult.final_score %>%</div>
+                                    <% 
+                                        let ratingClass = '';
+                                        let ratingIcon = '';
+                                        if (schedule.evaluationResult.final_rating === 'Great') {
+                                            ratingClass = 'rating-great';
+                                            ratingIcon = '🌟';
+                                        } else if (schedule.evaluationResult.final_rating === 'Good') {
+                                            ratingClass = 'rating-good';
+                                            ratingIcon = '👍';
+                                        } else if (schedule.evaluationResult.final_rating === 'Needs Improvement') {
+                                            ratingClass = 'rating-needs-improvement';
+                                            ratingIcon = '⚠️';
+                                        } else {
+                                            ratingClass = 'rating-unsatisfactory';
+                                            ratingIcon = '❌';
+                                        }
+                                    %>
+                                    <div class="score-rating <%= ratingClass %>">
+                                        <%= ratingIcon %> <%= schedule.evaluationResult.final_rating %>
+                                    </div>
+                                    <div style="font-size: 0.9rem; opacity: 0.8;">
+                                        Evaluated on <%= new Date(schedule.evaluationResult.evaluation_date).toLocaleDateString() %>
+                                    </div>
+                                </div>
+                            <% } else if (!schedule.isOldFormat) { %>
+                                <div style="background: rgba(255,165,0,0.1); padding: 1rem; border-radius: 10px; text-align: center; margin: 1rem 0;">
+                                    <p style="color: #f39c12; margin: 0;">⏳ Evaluation pending by observer</p>
+                                </div>
+                            <% } %>
+
+                            <!-- View Button -->
+                            <% 
+                                let resultRoute = '';
+                                let buttonText = 'VIEW RESULT';
+                                
+                                if (schedule.hasEvaluation && schedule.evaluationResult) {
+                                    resultRoute = `/CIT_Faculty_evaluation_result/${schedule._id}`;
+                                    buttonText = '📊 VIEW EVALUATION';
+                                } else if (schedule.copus === 'Copus 1') {
+                                    resultRoute = `/CIT_Faculty_copus_result1/${schedule._id}`;
+                                } else if (schedule.copus === 'Copus 2') {
+                                    resultRoute = `/CIT_Faculty_copus_result2/${schedule._id}`;
+                                } else if (schedule.copus === 'Copus 3') {
+                                    resultRoute = `/CIT_Faculty_copus_result3/${schedule._id}`;
+                                } else {
+                                    resultRoute = `/CIT_Faculty_copus_result`;
+                                    buttonText = '📋 VIEW DETAILS';
+                                }
+                            %>
+                            
+                            <a href="<%= resultRoute %>" class="view-btn">
+                                <i class="bi bi-eye"></i>
+                                <%= buttonText %>
+                            </a>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="no-results">
+                    <i class="bi bi-clipboard-x"></i>
+                    <h3>No COPUS Results Found</h3>
+                    <p>You don't have any completed COPUS evaluations yet.</p>
+                    <p>Once observers complete evaluations for your classes, they will appear here.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add any additional JavaScript functionality here
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('COPUS Results page loaded successfully');
+            
+            // Add smooth hover effects
+            const cards = document.querySelectorAll('.result-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

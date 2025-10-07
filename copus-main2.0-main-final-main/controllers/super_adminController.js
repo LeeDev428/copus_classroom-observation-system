@@ -4,6 +4,7 @@
 const User = require('../model/employee'); // Adjust path as per your project structure
 const Schedule = require('../model/schedule'); // Adjust path
 const CopusObservation = require('../model/copusObservation'); // Adjust path
+const CopusResult = require('../model/copusResult'); // COPUS results model
 const Log = require('../model/log'); // Adjust path
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -1095,17 +1096,25 @@ exports.getCopusResultOverview = async (req, res) => {
         const user = await User.findById(req.session.user.id);
         if (!user) return res.redirect('/login');
 
+        console.log('🔍 Super Admin fetching ALL completed schedules...');
+        
+        // Fetch ALL completed schedules (Super Admin can see everything)
         const completedSchedules = await Schedule.find({
-            observer: user.firstname + " " + user.lastname,
             status: 'completed'
         }).sort({ date: -1, start_time: -1 })
             .select('firstname lastname department date start_time end_time year_level semester subject_code subject observer copus modality');
+
+        console.log(`📊 Found ${completedSchedules.length} total completed schedules for Super Admin view`);
+
+        // Fetch chart data from copusresults collection
+        const chartData = await exports.getChartData();
 
         res.render('Super_Admin/copus_result', {
             completedSchedules: completedSchedules,
             firstName: user.firstname,
             lastName: user.lastname,
-            employeeId: user.employeeId
+            employeeId: user.employeeId,
+            chartData: chartData
         });
     } catch (err) {
         console.error('Error fetching completed schedules for Copus Result:', err);
@@ -1121,18 +1130,26 @@ exports.getCopusHistory = async (req, res) => {
             return res.redirect('/login');
         }
 
-        const observerFullName = `${user.firstname} ${user.lastname}`;
+        console.log('🔍 Super Admin fetching ALL COPUS results from copusresults collection...');
+        
+        // Fetch ALL COPUS results from copusresults collection (Super Admin can see everything)
+        const copusResults = await CopusResult.find({})
+            .sort({ evaluation_date: -1, submitted_at: -1 })
+            .lean();
 
-        const completedSchedules = await Schedule.find({
-            observer: observerFullName,
-            status: 'completed'
-        }).sort({ date: -1, start_time: -1 });
+        console.log(`📊 Found ${copusResults.length} total COPUS results for Super Admin view`);
+
+        // Fetch chart data from copusresults collection
+        const chartData = await exports.getChartData();
 
         res.render('Super_Admin/copus_history', {
-            completedSchedules: completedSchedules,
+            copusResults: copusResults,
             firstName: user.firstname,
             lastName: user.lastname,
-            employeeId: user.employeeId
+            employeeId: user.employeeId,
+            chartData: chartData,
+            error_msg: req.flash('error'),
+            success_msg: req.flash('success')
         });
     } catch (err) {
         console.error('Error fetching completed COPUS history:', err);
@@ -1318,7 +1335,7 @@ exports.addEmployee = async (req, res) => {
             service: 'gmail',
             auth: {
                 user: 'copus6251@gmail.com',
-                pass: 'spgh zwvd qevg oxoe ' // Use environment variables for sensitive info!
+                pass: 'ugpc lsxi pmro bwno' // Updated app password
             }
         });
 
@@ -1377,5 +1394,43 @@ exports.addEmployee = async (req, res) => {
             return res.status(400).json({ error: 'User with this email or employee ID already exists.' });
         }
         res.status(500).json({ error: 'Failed to add user or send email due to a server error.' });
+    }
+};
+
+// Helper function to get chart data
+exports.getChartData = async function() {
+    try {
+        // Get top 10 highest scores
+        const topHighest = await CopusResult.find({ overall_percentage: { $exists: true, $ne: null } })
+            .sort({ overall_percentage: -1 })
+            .limit(10)
+            .select('faculty_name overall_percentage final_rating')
+            .lean();
+
+        // Get top 10 lowest scores
+        const topLowest = await CopusResult.find({ overall_percentage: { $exists: true, $ne: null } })
+            .sort({ overall_percentage: 1 })
+            .limit(10)
+            .select('faculty_name overall_percentage final_rating')
+            .lean();
+
+        // Get top 1 overall score
+        const topOverall = await CopusResult.findOne({ overall_percentage: { $exists: true, $ne: null } })
+            .sort({ overall_percentage: -1 })
+            .select('faculty_name overall_percentage final_rating')
+            .lean();
+
+        return {
+            topHighest: topHighest || [],
+            topLowest: topLowest || [],
+            topOverall: topOverall || null
+        };
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+        return {
+            topHighest: [],
+            topLowest: [],
+            topOverall: null
+        };
     }
 };
